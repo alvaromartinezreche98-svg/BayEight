@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bay Eight Studios — Miami's Premier Recording Studio</title>
-  <meta name="description" content="25 years of award-winning recordings. Miami's premier recording studio — built for precision, privacy, and premium sound." />
+  <title>Careers — Bay Eight Studios</title>
+  <meta name="description" content="Internships and careers at Bay Eight Studios, Miami. Start your career where the records get made." />
+
+  <!-- Favicon, taken from bayeight.com -->
+  <link rel="icon" href="assets/icons/favicon-32x32.png" sizes="32x32" type="image/png" />
+  <link rel="icon" href="assets/icons/favicon-192x192.png" sizes="192x192" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icons/favicon-180x180.png" />
 
   <!-- Warm up the two CDNs the stylesheets come from -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,7 +23,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
 
   <!-- Project styles — bump ?v= when the browser keeps serving a stale copy -->
-  <link rel="stylesheet" href="css/style.css?v=58" />
+  <link rel="stylesheet" href="css/style.css?v=95" />
 
   <!-- The hero still is the largest paint; start it before the CSS resolves -->
   <link rel="preload" as="image" href="assets/img/careers-hero.jpg" fetchpriority="high" />
@@ -75,7 +80,7 @@
       <div class="container">
         <div class="row align-items-center g-4 g-lg-5">
 
-          <div class="col-lg-5">
+          <div class="col-lg-5 culture-copy">
             <p class="eyebrow reveal">Who We Are</p>
             <h2 class="culture-title reveal">Only the driven<br />belong here</h2>
             <p class="culture-text reveal">
@@ -91,32 +96,57 @@
             </p>
           </div>
 
-          <div class="col-lg-7">
-            <div class="culture-collage reveal">
-              <figure class="culture-shot culture-shot--a">
-                <img src="assets/img/culture/who-1.jpg" alt="Two team members talking at the lounge table"
-                     width="480" height="640" decoding="async" loading="lazy" />
-              </figure>
-              <figure class="culture-shot culture-shot--b">
-                <img src="assets/img/culture/who-2.jpg" alt="Two team members with a guitar in the live room"
-                     width="480" height="640" decoding="async" loading="lazy" />
-              </figure>
-              <figure class="culture-shot culture-shot--c">
-                <img src="assets/img/culture/who-3.jpg" alt="The team laughing together on the studio couch"
-                     width="900" height="560" decoding="async" loading="lazy" />
-              </figure>
-              <figure class="culture-shot culture-shot--d">
-                <img src="assets/img/culture/who-4.jpg" alt="Team members catching up between sessions"
-                     width="560" height="400" decoding="async" loading="lazy" />
-              </figure>
-              <figure class="culture-shot culture-shot--e">
-                <img src="assets/img/culture/who-5.jpg" alt="Two team members at a laptop under the Miami sign"
-                     width="560" height="400" decoding="async" loading="lazy" />
-              </figure>
-              <figure class="culture-shot culture-shot--f">
-                <img src="assets/img/culture/who-6.jpg" alt="A team member mid-conversation in the studio"
-                     width="480" height="640" decoding="async" loading="lazy" />
-              </figure>
+          <div class="col-lg-7 culture-media">
+            <!-- Six tiles; reveal-group fades them in one after another. -->
+            <!-- The mosaic loops: both groups are identical, which is what makes the
+                 -50% slide hand off invisibly. Edit a shot in BOTH groups. -->
+            <div class="culture-strip reveal">
+              <div class="culture-track">
+                <div class="culture-collage">
+                  <figure class="culture-shot culture-shot--a">
+                    <img src="assets/img/culture/who-1.jpg" alt="Two team members talking at the lounge table"
+                         width="480" height="640" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--c">
+                    <img src="assets/img/culture/who-3.jpg" alt="The team laughing together on the studio couch"
+                         width="900" height="560" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--d">
+                    <img src="assets/img/culture/who-4.jpg" alt="Team members catching up between sessions"
+                         width="560" height="400" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--e">
+                    <img src="assets/img/culture/who-5.jpg" alt="Two team members at a laptop under the Miami sign"
+                         width="560" height="400" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--f">
+                    <img src="assets/img/culture/who-6.jpg" alt="A team member mid-conversation in the studio"
+                         width="480" height="640" decoding="async" loading="lazy" />
+                  </figure>
+                </div>
+                <div class="culture-collage" aria-hidden="true">
+                  <figure class="culture-shot culture-shot--a">
+                    <img src="assets/img/culture/who-1.jpg" alt=""
+                         width="480" height="640" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--c">
+                    <img src="assets/img/culture/who-3.jpg" alt=""
+                         width="900" height="560" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--d">
+                    <img src="assets/img/culture/who-4.jpg" alt=""
+                         width="560" height="400" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--e">
+                    <img src="assets/img/culture/who-5.jpg" alt=""
+                         width="560" height="400" decoding="async" loading="lazy" />
+                  </figure>
+                  <figure class="culture-shot culture-shot--f">
+                    <img src="assets/img/culture/who-6.jpg" alt=""
+                         width="480" height="640" decoding="async" loading="lazy" />
+                  </figure>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -150,6 +180,9 @@
             <span class="dna-chip">Personality</span>
             <p class="dna-card-text">You've got character and presence. Vanilla doesn't cut it here.</p>
           </li>
+          <!-- Zero-height flex break: forces two per row while each card still
+               sizes to its own copy. -->
+          <li class="dna-break" aria-hidden="true"></li>
           <li class="dna-card dna-card--versatility">
             <span class="dna-chip">Versatility</span>
             <p class="dna-card-text">You learn, retain, adapt, and deliver and grow.</p>
@@ -363,7 +396,7 @@
 
                 <div class="google-box">
                   <img class="google-mark" src="assets/img/google-top-rated.svg" alt="Google"
-                       decoding="async" loading="lazy" />
+                       decoding="async" loading="lazy" width="120" height="40" />
                   <div class="google-copy">
                     <p class="google-title">Top Rated Recording Studio in South Florida</p>
                     <p class="google-rating">
@@ -390,7 +423,7 @@
             <div class="col-lg-7">
               <div class="contact-form-wrap">
                 <div class="contact-form-media" aria-hidden="true">
-                  <img src="assets/img/sessions/session-a.jpg" alt="" decoding="async" loading="lazy" />
+                  <img src="assets/img/culture/contact-form-bg.jpg" alt="" decoding="async" loading="lazy" width="444" height="492" />
                   <div class="contact-form-overlay"></div>
                 </div>
 
@@ -473,7 +506,7 @@
     <section id="faq" class="faq">
 
       <div class="faq-media" aria-hidden="true">
-        <img src="assets/img/culture/booth-bg.jpg" alt="" decoding="async" loading="lazy" />
+        <img src="assets/img/culture/booth-bg.jpg" alt="" decoding="async" loading="lazy" width="850" height="610" />
         <div class="faq-overlay"></div>
       </div>
 
@@ -674,9 +707,9 @@
             </p>
           </div>
 
-          <div class="col-lg-2 d-flex align-items-center justify-content-lg-end">
+          <div class="col-lg-2 d-flex align-items-start justify-content-lg-end">
             <img class="footer-years" src="assets/img/years-riaa.png"
-                 alt="25+ years of service — RIAA certified" decoding="async" loading="lazy" />
+                 alt="25+ years of service — RIAA certified" decoding="async" loading="lazy" width="584" height="349" />
           </div>
 
         </div>
@@ -710,7 +743,7 @@
         <div class="col-lg-4">
           <div class="google-box">
             <img class="google-mark" src="assets/img/google-top-rated.svg" alt="Google"
-                 decoding="async" loading="lazy" />
+                 decoding="async" loading="lazy" width="120" height="40" />
             <div class="google-copy">
               <p class="google-title">Top Rated Recording Studio in South Florida</p>
               <p class="google-rating">
@@ -754,6 +787,6 @@
 
   <!-- No Bootstrap JS: the slide-in menu was the only component in use, and
        main.js drives it against Bootstrap's own offcanvas CSS classes. -->
-  <script src="js/main.js?v=58" defer></script>
+  <script src="js/main.js?v=95" defer></script>
 </body>
 </html>

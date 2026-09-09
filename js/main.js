@@ -106,6 +106,99 @@
   }
 
   /* ------------------------------------------------------------------
+     Marquees — the two photo strips. CSS animates them on its own; once this
+     runs it takes the animation over so the same track can also be dragged.
+     Falls back to the pure-CSS loop if this block never executes.
+     ------------------------------------------------------------------ */
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (!reducedMotion.matches) {
+    document.querySelectorAll('.culture-strip, .interns-strip').forEach((strip) => {
+      const track = strip.querySelector('.culture-track, .interns-track');
+      const group = track && track.firstElementChild;
+      if (!group) return;
+
+      // Hand the animation over to us; the CSS keyframes stay as the fallback.
+      track.style.animation = 'none';
+      track.style.willChange = 'transform';
+      strip.classList.add('is-draggable');
+
+      const SPEED = 26; // px per second, left to right — matches the CSS timing
+      let loop = 0;     // one group plus one gap: the distance a full cycle covers
+      let offset = 0;
+      let paused = false;
+      let dragging = false;
+      let startX = 0;
+      let startOffset = 0;
+      let last = 0;
+
+      const measure = () => {
+        const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+        loop = group.getBoundingClientRect().width + gap;
+      };
+      measure();
+      window.addEventListener('resize', measure);
+
+      const wrap = () => {
+        if (!loop) return;
+        // Keep offset inside [0, loop) so the transform never grows unbounded
+        offset = ((offset % loop) + loop) % loop;
+      };
+
+      const draw = () => { track.style.transform = 'translateX(' + -offset + 'px)'; };
+
+      const frame = (now) => {
+        const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+        last = now;
+        if (!paused && !dragging) {
+          offset -= SPEED * dt;
+          wrap();
+          draw();
+        }
+        requestAnimationFrame(frame);
+      };
+      offset = loop;
+      wrap();
+      draw();
+      requestAnimationFrame(frame);
+
+      strip.addEventListener('pointerenter', () => { paused = true; });
+      strip.addEventListener('pointerleave', () => { paused = false; });
+
+      strip.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 && event.pointerType === 'mouse') return;
+        dragging = true;
+        startX = event.clientX;
+        startOffset = offset;
+        strip.setPointerCapture(event.pointerId);
+        strip.classList.add('is-dragging');
+      });
+
+      strip.addEventListener('pointermove', (event) => {
+        if (!dragging) return;
+        // Drag right, the strip follows right
+        offset = startOffset - (event.clientX - startX);
+        wrap();
+        draw();
+      });
+
+      const endDrag = (event) => {
+        if (!dragging) return;
+        dragging = false;
+        strip.classList.remove('is-dragging');
+        if (event && event.pointerId != null && strip.hasPointerCapture(event.pointerId)) {
+          strip.releasePointerCapture(event.pointerId);
+        }
+      };
+      strip.addEventListener('pointerup', endDrag);
+      strip.addEventListener('pointercancel', endDrag);
+
+      // A drag that ends over an image would otherwise fire a click on it
+      strip.addEventListener('dragstart', (event) => event.preventDefault());
+    });
+  }
+
+  /* ------------------------------------------------------------------
      Footer year
      ------------------------------------------------------------------ */
   const year = document.getElementById('year');

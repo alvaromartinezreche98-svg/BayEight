@@ -12,6 +12,8 @@
   /* No surface token exists on their side; this is --primary-black lifted
      just enough that panels read as raised rather than as holes. */
   --line:          rgba(255, 255, 255, 0.08);
+  /* The heavier rule the footer and the photo sections are marked off with */
+  --line-section:  rgba(255, 255, 255, 0.16);
   --ink:           #ffffff;
   --muted:         #eaeef9;   /* their --pastel-blue-gray */
   --muted-2:       #9ba8c5;
@@ -27,11 +29,13 @@
   --font-display:  'Montserrat', system-ui, sans-serif;
   --text-base:     17px;
   /* their section h2 (.et_pb_text_35 h2 and friends) is a flat 44px */
-  --h2-size:       44px;
+  --h2-size:       45px;
   --text-lh:       1.8;
 
   /* Rhythm */
   --nav-h:         104px;
+  /* Every section breathes by the same amount, top and bottom */
+  --section-pad:   116px;
 }
 
 /* --------------------------------------------------------------------------
@@ -100,6 +104,17 @@ a { transition: color 0.3s ease-in-out; }
 /* Their big h2 steps down the same way the footer h2 does (42 / 36 / 22) */
 @media (max-width: 980px) { :root { --h2-size: 36px; } }
 @media (max-width: 767px) { :root { --h2-size: 28px; } }
+
+/* 116px top and bottom is a lot of a phone screen — step it down with the type */
+@media (max-width: 980px) { :root { --section-pad: 88px; } }
+@media (max-width: 767px) { :root { --section-pad: 64px; } }
+
+/* The one fixed size with no step of its own */
+@media (max-width: 767px) { .dna-chip { font-size: 24px; } }
+
+/* Their footer wordmark steps 42 / 36 / 22 */
+@media (max-width: 980px) { .footer-shout { font-size: 36px; } }
+@media (max-width: 767px) { .footer-shout { font-size: 22px; } }
 
 
 /* --------------------------------------------------------------------------
@@ -175,8 +190,9 @@ a { transition: color 0.3s ease-in-out; }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-top: calc(var(--nav-h) + 1rem);
-  padding-bottom: 2rem;
+  /* Same as every other section, but never less than the fixed header needs */
+  padding-top: max(var(--section-pad), calc(var(--nav-h) + 1rem));
+  padding-bottom: var(--section-pad);
   overflow: hidden;
   isolation: isolate;
 }
@@ -239,14 +255,14 @@ a { transition: color 0.3s ease-in-out; }
   transform: scale(-1, 1);
 }
 
-/* .hdng1 on their side resolves to 110px, floored at 40px on small screens.
-   The drop shadow is theirs verbatim: .et_pb_text_0 h1 { text-shadow: .08em
-   .08em 0em rgba(0,0,0,.4) } — a hard offset, no blur, sized in em so it
-   tracks the type. */
+/* Their .hdng1 ladder, verbatim: clamp(40px,110px,120px) — a constant 110px —
+   above 981px, 45px on tablet, 33px on phone. Not fluid; three flat steps.
+   The drop shadow is theirs too: .et_pb_text_0 h1 { text-shadow: .08em .08em
+   0em rgba(0,0,0,.4) } — a hard offset, no blur, sized in em. */
 .hero-title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(2.5rem, 8vw, 110px);
+  font-size: 110px;
   line-height: 0.95;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -255,21 +271,42 @@ a { transition: color 0.3s ease-in-out; }
   margin-bottom: 0.3em;
 }
 
+/* Their subtitle is an <h4>, so the global h1–h6 rule gives it Integral CF
+   *Extra Bold* and letter-spacing:1px. The module's font-weight:600 and the
+   span's inline font-weight:400 are both inert there — that face ships in one
+   weight. Montserrat does have weights, so it takes 800 to read as heavy as
+   theirs. Size is their module's 29px. */
 .hero-tagline {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(0.9rem, 1.5vw, 20px);
-  letter-spacing: 0.06em;
+  font-size: 20px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--ink);
   margin-bottom: 0;
+}
+
+@media (max-width: 980px) {
+  .hero-title   { font-size: 45px; }
+  .hero-tagline { font-size: 22px; }
+}
+
+@media (max-width: 767px) {
+  .hero-title   { font-size: 33px; }
+  .hero-tagline { font-size: 18px; }
 }
 /* --------------------------------------------------------------------------
    SECTION 2 — Who we are
    -------------------------------------------------------------------------- */
 .culture {
   background-color: var(--bg);
-  padding-block: clamp(3rem, 7vw, 6rem);
+  padding-block: var(--section-pad);
+}
+
+/* 37/63 rather than Bootstrap's 5/7 (41.67/58.33) — twelfths don't land on 37 */
+@media (min-width: 992px) {
+  .culture-copy  { flex: 0 0 37%; max-width: 37%; }
+  .culture-media { flex: 0 0 63%; max-width: 63%; }
 }
 
 .culture-title {
@@ -288,6 +325,9 @@ a { transition: color 0.3s ease-in-out; }
   font-size: var(--text-base);
   line-height: var(--text-lh);
   max-width: 34rem;
+  /* Stops a single word being left alone on the last line. Ignored by browsers
+     that don't support it, so the wider column above does the real work. */
+  text-wrap: pretty;
   margin-bottom: 1rem;
 }
 
@@ -296,32 +336,83 @@ a { transition: color 0.3s ease-in-out; }
 /* Six tiles on one grid. Columns 3 and 4 carry the wide shot on the top row and
    the two small shots underneath, so the whole block stays a single grid rather
    than nested rows. */
+/* The mosaic scrolls, so it needs a definite width for the fr columns to
+   resolve against and for the flex track to measure with max-content. */
 .culture-collage {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr 1.75fr 1.7fr 1fr;
+  /* Outer columns share one width so the two tall tiles mirror each other */
+  grid-template-columns: 1fr 1.75fr 1.7fr 1fr;
   grid-template-rows: 1.7fr 1fr;
   gap: 0.5rem;
+  flex: 0 0 auto;
+  width: clamp(28rem, 52vw, 48rem);
   height: clamp(20rem, 30vw, 29rem);
 }
 
-/* Runs out to within 5px of the right edge of the window, which is what makes
-   the tiles bigger without cutting any of them off.
+/* Two identical groups on a flex track sliding by exactly -50%, less half the
+   gap so the seam spaces like every other join. Stays inside its column — no
+   bleed to the window edge. */
+.culture-strip {
+  --strip-gap: 0.5rem;
+  overflow: hidden;
+}
 
-   The gap has to be measured against the *container*, not this element: a
-   percentage in `margin-right` resolves against the column, which is only 7/12
-   of the container, so `calc(50vw - 50%)` overshot by ~270px at 1680. Bootstrap's
-   container max-width is a known constant per breakpoint, so it is used directly
+/* Runs flush to the right edge of the window.
+
+   The distance has to be measured against the *container*, not this element: a
+   percentage in `margin-right` resolves against the column, which is only 63%
+   as wide, so `calc(50vw - 50%)` overshoots badly. Bootstrap's container
+   max-width is a known constant per breakpoint, so it is used directly
    (+12px for the container's own padding). */
 @media (min-width: 992px) {
-  .culture-collage {
+  .culture-strip {
     --edge: calc((100vw - 960px) / 2 + 12px);
-    margin-right: calc(10px - var(--edge));
-    height: clamp(22rem, 34vw, 33rem);
+    margin-right: calc(-1 * var(--edge));
   }
 }
 
-@media (min-width: 1200px) { .culture-collage { --edge: calc((100vw - 1140px) / 2 + 12px); } }
-@media (min-width: 1400px) { .culture-collage { --edge: calc((100vw - 1320px) / 2 + 12px); } }
+@media (min-width: 1200px) { .culture-strip { --edge: calc((100vw - 1140px) / 2 + 12px); } }
+@media (min-width: 1400px) { .culture-strip { --edge: calc((100vw - 1320px) / 2 + 12px); } }
+
+.culture-track {
+  display: flex;
+  width: max-content;
+  gap: var(--strip-gap);
+  animation: culture-loop 48s linear infinite reverse;
+}
+
+@keyframes culture-loop {
+  to { transform: translateX(calc(-50% - var(--strip-gap) / 2)); }
+}
+
+.culture-strip:hover .culture-track,
+.culture-strip:focus-within .culture-track { animation-play-state: paused; }
+
+/* Added by main.js once it takes the animation over — signals the strip can be
+   dragged, and stops the browser's own image-drag and text selection. */
+.is-draggable {
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.is-draggable.is-dragging { cursor: grabbing; }
+
+.is-draggable img {
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .culture-track { animation: none; }
+  .culture-strip { overflow-x: auto; }
+}
+
+@media (min-width: 992px) {
+  .culture-collage {
+    height: clamp(24rem, 36vw, 34rem);
+  }
+}
 
 .culture-shot {
   margin: 0;
@@ -351,20 +442,21 @@ a { transition: color 0.3s ease-in-out; }
 }
 
 .culture-shot--a { grid-column: 1; grid-row: 1 / 3; }
-.culture-shot--b { grid-column: 2; grid-row: 1 / 3; }
-.culture-shot--c { grid-column: 3 / 5; grid-row: 1; }
-.culture-shot--d { grid-column: 3; grid-row: 2; }
-.culture-shot--e { grid-column: 4; grid-row: 2; }
-.culture-shot--f { grid-column: 5; grid-row: 1 / 3; }
+.culture-shot--c { grid-column: 2 / 4; grid-row: 1; }
+.culture-shot--d { grid-column: 2; grid-row: 2; }
+.culture-shot--e { grid-column: 3; grid-row: 2; }
+.culture-shot--f { grid-column: 4; grid-row: 1 / 3; }
 
 /* Under lg the copy stacks above the collage, so the five-column strip is far
    too thin. Drop to three columns and let the wide shot lead. */
 @media (max-width: 991.98px) {
+  .culture-strip { margin-top: 2rem; }
+
   .culture-collage {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: 1.35fr 1fr;
+    width: clamp(20rem, 92vw, 34rem);
     height: clamp(17rem, 52vw, 24rem);
-    margin-top: 2rem;
   }
 
   .culture-shot--c { grid-column: 1 / 3; grid-row: 1; }
@@ -372,7 +464,6 @@ a { transition: color 0.3s ease-in-out; }
   .culture-shot--d { grid-column: 1; grid-row: 2; }
   .culture-shot--e { grid-column: 2; grid-row: 2; }
   .culture-shot--f { grid-column: 3; grid-row: 2; }
-  .culture-shot--b { display: none; }
 }
 /* --------------------------------------------------------------------------
    Shared heading trio — used by Studios, Services, Reviews, Booking,
@@ -412,12 +503,25 @@ a { transition: color 0.3s ease-in-out; }
 /* --------------------------------------------------------------------------
    SECTION 3 — The DNA of Bay Eight
    -------------------------------------------------------------------------- */
+/* Same rule the footer is marked off with */
+.dna,
+.stories,
+.faq {
+  border-top: 1px solid var(--line-section);
+  border-bottom: 1px solid var(--line-section);
+}
+
 .dna {
   position: relative;
   isolation: isolate;
-  padding-block: clamp(3rem, 7vw, 6rem);
+  padding-block: var(--section-pad);
   background: url("../assets/img/culture/dna-bg.jpg") center / cover no-repeat;
   background-color: var(--bg);
+  /* Without this the section's photo paints under the border box too, so a
+     semi-transparent rule picks up the image instead of reading like the
+     footer's. Clipping to the padding box leaves the border over the page
+     colour, exactly as it sits on the footer. */
+  background-clip: padding-box;
 }
 
 /* Scrim. The photo is only texture here, so it sits well back behind the copy
@@ -429,9 +533,9 @@ a { transition: color 0.3s ease-in-out; }
   z-index: -1;
   background: linear-gradient(
     100deg,
-    rgba(0, 0, 0, 0.94) 0%,
-    rgba(0, 0, 0, 0.86) 45%,
-    rgba(0, 0, 0, 0.72) 100%
+    rgba(0, 0, 0, 0.96) 0%,
+    rgba(0, 0, 0, 0.91) 45%,
+    rgba(0, 0, 0, 0.82) 100%
   );
 }
 
@@ -456,22 +560,32 @@ a { transition: color 0.3s ease-in-out; }
 
 /* Two per row, but each card only as wide as its own copy — that ragged edge
    is the point, so the cards are not stretched to fill their cell. */
+/* Flex, not grid: a grid column is as wide as its widest card and the others
+   stretch to match it. Here each card is only as wide as its own copy, and the
+   break element below keeps it to two per row. */
 .dna-grid {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
+  display: flex;
+  flex-wrap: wrap;
   justify-content: start;
-  gap: clamp(0.75rem, 1.4vw, 1.1rem);
+  gap: 20px;
   max-width: 100%;
 }
 
-/* The second row steps in, echoing the mock's staggered look */
-.dna-card:nth-child(n + 3) { margin-left: clamp(0.5rem, 1.6vw, 1.25rem); }
+.dna-break {
+  flex: 0 0 100%;
+  height: 0;
+  margin: 0;
+}
+
+/* Only the first card of the second row steps in, echoing the mock's stagger */
+.dna-break + .dna-card { margin-left: clamp(0.5rem, 1.6vw, 1.25rem); }
 
 .dna-card {
   --dna-fill: var(--accent);
+  flex: 0 0 auto;
   background-color: var(--dna-fill);
   border-radius: clamp(10px, 1.1vw, 14px);
   padding: clamp(0.7rem, 1vw, 0.95rem) clamp(1rem, 1.7vw, 1.5rem);
@@ -490,7 +604,7 @@ a { transition: color 0.3s ease-in-out; }
   color: #000;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(1.15rem, 1.9vw, 1.65rem);
+  font-size: 30px;
   line-height: 1.1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -502,15 +616,15 @@ a { transition: color 0.3s ease-in-out; }
 .dna-card-text {
   color: var(--ink);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.45;
   margin: 0;
 }
 
-/* max-content columns would overflow a phone, so drop to one card per row */
+/* Content-width cards would overflow a phone, so give each one the full row */
 @media (max-width: 767.98px) {
-  .dna-grid { grid-template-columns: 1fr; }
-  .dna-card:nth-child(n + 3) { margin-left: 0; }
+  .dna-card { flex: 1 1 100%; }
+  .dna-break + .dna-card { margin-left: 0; }
 }
 /* --------------------------------------------------------------------------
    Google rating box — shared by the hero and the booking section
@@ -601,7 +715,7 @@ a { transition: color 0.3s ease-in-out; }
    -------------------------------------------------------------------------- */
 .interns {
   background-color: var(--bg);
-  padding-block: clamp(3rem, 7vw, 6rem);
+  padding-block: var(--section-pad);
 }
 
 .interns-title {
@@ -619,7 +733,10 @@ a { transition: color 0.3s ease-in-out; }
   color: var(--ink);
   font-size: var(--text-base);
   line-height: var(--text-lh);
-  max-width: 34rem;
+  /* Fills the col-lg-6 it sits in — 34rem left ~90px of dead space on the right */
+  max-width: 40rem;
+  /* Keeps the last line from ending on a single orphaned word */
+  text-wrap: pretty;
   margin-bottom: 1.1rem;
 }
 
@@ -697,9 +814,14 @@ a { transition: color 0.3s ease-in-out; }
 .stories {
   position: relative;
   isolation: isolate;
-  padding-block: clamp(3rem, 7vw, 6rem);
+  padding-block: var(--section-pad);
   background: url("../assets/img/culture/stories-bg.jpg") center / cover no-repeat;
   background-color: var(--bg);
+  /* Without this the section's photo paints under the border box too, so a
+     semi-transparent rule picks up the image instead of reading like the
+     footer's. Clipping to the padding box leaves the border over the page
+     colour, exactly as it sits on the footer. */
+  background-clip: padding-box;
 }
 
 .stories::before {
@@ -728,7 +850,8 @@ a { transition: color 0.3s ease-in-out; }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: start;
-  gap: clamp(1rem, 2vw, 1.75rem);
+  /* Wider gutters pull the three equal columns in, so each card sits tighter */
+  gap: clamp(1.5rem, 3.4vw, 3.25rem);
 }
 
 /* White cards on a dark page — the only place the palette inverts, so the
@@ -796,19 +919,20 @@ a { transition: color 0.3s ease-in-out; }
    -------------------------------------------------------------------------- */
 .contact {
   background-color: var(--bg);
-  padding-block: clamp(2.5rem, 5vw, 4rem);
+  padding-block: var(--section-pad);
   text-align: center;
 }
 
+/* Same 45px step as every other section heading — it used to run to 72px */
 .contact-head {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(2rem, 5.5vw, 4.5rem);
-  line-height: 1;
-  letter-spacing: 0.01em;
+  font-size: var(--h2-size);
+  line-height: 1.08;
+  letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--ink);
-  margin-bottom: clamp(0.9rem, 1.8vw, 1.4rem);
+  margin-bottom: clamp(1.75rem, 3.2vw, 2.75rem);
 }
 
 .contact-head .welcome-dot {
@@ -992,7 +1116,7 @@ a.contact-item-value:hover { color: var(--accent); }
 
 .field-label {
   display: block;
-  font-size: clamp(0.65rem, 0.78vw, 0.75rem);
+  font-size: 14px;
   font-weight: 700;
   color: #1c1c1e;
   margin-bottom: 0.3rem;
@@ -1018,7 +1142,7 @@ a.contact-item-value:hover { color: var(--accent); }
   width: 100%;
   padding: 0.45rem 0.65rem;
   font-family: var(--font-body);
-  font-size: clamp(0.7rem, 0.85vw, 0.8rem);
+  font-size: 14px;
   font-weight: 500;
   color: #1c1c1e;
   background-color: #fff;
@@ -1101,7 +1225,7 @@ a.contact-item-value:hover { color: var(--accent); }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-block: clamp(3rem, 6vw, 5rem);
+  padding-block: var(--section-pad);
 }
 
 .faq-media {
@@ -1114,7 +1238,9 @@ a.contact-item-value:hover { color: var(--accent); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 25% center;
+  /* The source is cropped so he sits about 23% across and 21% down; anchoring
+     the top keeps him there instead of letting a wide box crop to his chest. */
+  object-position: center top;
   /* Only partly desaturated — the mock still reads the room, it is just dark */
   filter: grayscale(0.35) contrast(1.05) brightness(0.9);
 }
@@ -1170,8 +1296,11 @@ a.contact-item-value:hover { color: var(--accent); }
   gap: 1rem;
   padding: clamp(0.85rem, 1.6vw, 1.25rem) clamp(1rem, 1.8vw, 1.5rem);
   font-family: var(--font-display);
-  font-weight: 900;
-  font-size: clamp(0.8rem, 1.15vw, 1.05rem);
+  /* Their rule says 600, but that lands on Integral CF Extra Bold — a
+     single-weight face, so the number is inert there. Montserrat does honour
+     it, and 600 read far too light, so this matches the rendered weight. */
+  font-weight: 800;
+  font-size: 17px;
   line-height: 1.25;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -1239,7 +1368,9 @@ a.contact-item-value:hover { color: var(--accent); }
    Buttons
    -------------------------------------------------------------------------- */
 .btn {
-  --bs-btn-font-weight: 700;
+  /* Their .et_pb_button sits at 16px / 600 */
+  --bs-btn-font-weight: 600;
+  --bs-btn-font-size: 16px;
   /* They run fully rounded buttons (border-radius 32px-100px on .et_pb_button) */
   --bs-btn-border-radius: 999px;
   --bs-btn-padding-x: 1.75rem;
@@ -1308,12 +1439,20 @@ a.contact-item-value:hover { color: var(--accent); }
    -------------------------------------------------------------------------- */
 :root {
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* bayeight.com's own scroll-reveal settings (--sr-* on their side) */
+  --sr-duration:  700ms;
+  --sr-stagger:   28ms;
+  --sr-ease:      cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sr-translate: 16px;
+  /* the easing they hover cards with (.colhvr:hover .txthvr) */
+  --hover-ease:   cubic-bezier(0.39, 0.575, 0.565, 1);
 }
 
 .reveal {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transform: translateY(var(--sr-translate));
+  transition: opacity var(--sr-duration) var(--sr-ease),
+              transform var(--sr-duration) var(--sr-ease);
   transition-delay: var(--d, 0s);
 }
 
@@ -1335,24 +1474,24 @@ a.contact-item-value:hover { color: var(--accent); }
    overriding `transform` afterwards, so hover scaling would never apply. */
 .reveal-group.is-visible > * {
   opacity: 1;
-  animation: hero-rise 0.6s var(--ease-out) backwards;
+  animation: hero-rise var(--sr-duration) var(--sr-ease) backwards;
 }
 
 /* One rule per child — the FAQ list is the longest group at 11 items.
    Extend this if a longer group ever appears. */
-.reveal-group.is-visible > *:nth-child(2) { animation-delay: 0.06s; }
-.reveal-group.is-visible > *:nth-child(3) { animation-delay: 0.12s; }
-.reveal-group.is-visible > *:nth-child(4) { animation-delay: 0.18s; }
-.reveal-group.is-visible > *:nth-child(5) { animation-delay: 0.24s; }
-.reveal-group.is-visible > *:nth-child(6) { animation-delay: 0.30s; }
-.reveal-group.is-visible > *:nth-child(7) { animation-delay: 0.36s; }
-.reveal-group.is-visible > *:nth-child(8) { animation-delay: 0.42s; }
-.reveal-group.is-visible > *:nth-child(9) { animation-delay: 0.48s; }
-.reveal-group.is-visible > *:nth-child(10) { animation-delay: 0.54s; }
-.reveal-group.is-visible > *:nth-child(11) { animation-delay: 0.60s; }
-.reveal-group.is-visible > *:nth-child(12) { animation-delay: 0.66s; }
-.reveal-group.is-visible > *:nth-child(13) { animation-delay: 0.72s; }
-.reveal-group.is-visible > *:nth-child(14) { animation-delay: 0.78s; }
+.reveal-group.is-visible > *:nth-child(2) { animation-delay: calc(var(--sr-stagger) * 1); }
+.reveal-group.is-visible > *:nth-child(3) { animation-delay: calc(var(--sr-stagger) * 2); }
+.reveal-group.is-visible > *:nth-child(4) { animation-delay: calc(var(--sr-stagger) * 3); }
+.reveal-group.is-visible > *:nth-child(5) { animation-delay: calc(var(--sr-stagger) * 4); }
+.reveal-group.is-visible > *:nth-child(6) { animation-delay: calc(var(--sr-stagger) * 5); }
+.reveal-group.is-visible > *:nth-child(7) { animation-delay: calc(var(--sr-stagger) * 6); }
+.reveal-group.is-visible > *:nth-child(8) { animation-delay: calc(var(--sr-stagger) * 7); }
+.reveal-group.is-visible > *:nth-child(9) { animation-delay: calc(var(--sr-stagger) * 8); }
+.reveal-group.is-visible > *:nth-child(10) { animation-delay: calc(var(--sr-stagger) * 9); }
+.reveal-group.is-visible > *:nth-child(11) { animation-delay: calc(var(--sr-stagger) * 10); }
+.reveal-group.is-visible > *:nth-child(12) { animation-delay: calc(var(--sr-stagger) * 11); }
+.reveal-group.is-visible > *:nth-child(13) { animation-delay: calc(var(--sr-stagger) * 12); }
+.reveal-group.is-visible > *:nth-child(14) { animation-delay: calc(var(--sr-stagger) * 13); }
 
 /* --------------------------------------------------------------------------
    Utilities
@@ -1364,12 +1503,19 @@ a.contact-item-value:hover { color: var(--accent); }
    -------------------------------------------------------------------------- */
 /* Near-black with only a whisper of warmth — the live footer reads almost flat.
    The pink there is brighter than the page accent, so it's scoped here. */
+/* The live footer runs much wider than the page container — its panel sits
+   about 5.2vw in from each edge at 1680, against the container's 180px. */
+.site-footer > .container {
+  max-width: none;
+  padding-inline: clamp(1.25rem, 5.2vw, 5.5rem);
+}
+
 .site-footer {
   --pink: var(--accent);
   background-color: #0d0809;
   background-image: radial-gradient(120% 85% at 50% 20%, rgba(105, 18, 50, 0.18), transparent 68%);
   /* Rule across the top, marking the footer off from the section above it */
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid var(--line-section);
   /* Height comes from the content, not the viewport — the mock's footer is a
      compact band, and tying it to 100svh stretched it on tall windows. */
   padding-block: clamp(1.75rem, 3.5vw, 3rem);
@@ -1389,7 +1535,7 @@ a.contact-item-value:hover { color: var(--accent); }
   margin: 0;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(1.8rem, 5vw, 4rem);
+  font-size: 42px;
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -1425,7 +1571,7 @@ a.contact-item-value:hover { color: var(--accent); }
 .footer-title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(0.8rem, 1.05vw, 1rem);
+  font-size: 18px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink);
@@ -1485,14 +1631,19 @@ a.footer-contact-head:hover { color: var(--pink); }
 
 .footer-contact a:not(.footer-contact-head):hover { color: var(--accent-bright); }
 
+/* Short rule, as on the live site — an <hr> with no width spans the whole
+   column, which got long once the footer widened. */
 .footer-rule {
-  border-color: rgba(255, 255, 255, 0.15);
+  width: 14rem;
+  max-width: 100%;
   margin-block: 1.1rem;
+  margin-inline: 0;
+  border-color: rgba(255, 255, 255, 0.15);
   opacity: 1;
 }
 
 .footer-years {
-  width: clamp(120px, 12vw, 170px);
+  width: clamp(150px, 16vw, 245px);
   height: auto;
 }
 
@@ -1509,7 +1660,7 @@ a.footer-contact-head:hover { color: var(--pink); }
 .footer-subtitle {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(0.7rem, 0.88vw, 0.82rem);
+  font-size: 18px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink);
@@ -1627,12 +1778,12 @@ a.footer-contact-head:hover { color: var(--pink); }
    Hero entrance — the lockup arrives a beat after the page paints
    -------------------------------------------------------------------------- */
 @keyframes hero-rise {
-  from { opacity: 0; transform: translateY(26px); }
+  from { opacity: 0; transform: translateY(var(--sr-translate)); }
   to   { opacity: 1; transform: none; }
 }
 
 .hero-inner > * {
-  animation: hero-rise 0.9s var(--ease-out) both;
+  animation: hero-rise var(--sr-duration) var(--sr-ease) both;
 }
 
 .hero-title   { animation-delay: 0.05s; }
@@ -1641,19 +1792,26 @@ a.footer-contact-head:hover { color: var(--pink); }
 /* --------------------------------------------------------------------------
    Hover polish across the cards
    -------------------------------------------------------------------------- */
-.faq-item,
 .contact-icon,
-.contact-social a,
-.story {
+.contact-social a {
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out,
               background-color 0.3s ease-in-out, border-color 0.3s ease-in-out,
               color 0.3s ease-in-out;
 }
 
-/* Lifted from their .et_pb_row_22:hover — a flat halo in the brand pink */
+/* Lifted from their .et_pb_row_22:hover — a flat halo in the brand pink, plus
+   the small scale their .colhvr:hover .txthvr uses, on the same easing. */
 .story:hover,
-.faq-item:hover {
+.faq-item:hover,
+.dna-card:hover {
   box-shadow: 0 0 40px var(--accent);
+  transform: scale(1.015);
+}
+
+.story,
+.faq-item,
+.dna-card {
+  transition: transform 0.4s var(--hover-ease), box-shadow 0.3s ease-in-out;
 }
 
 
