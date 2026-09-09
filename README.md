@@ -15,7 +15,13 @@ framework, no bundler — open the file and it runs.
 
 - Bootstrap 5.3.3 **CSS only** + Bootstrap Icons 1.11.3 (jsDelivr CDN). The JS
   bundle is deliberately not loaded; nothing on the page needs it.
-- Google Fonts: **Poppins** (body, 400) + **Montserrat** (headings).
+- Google Fonts: **Poppins** (body, 400) + **Montserrat** (heading fallback).
+- **Integral CF Extra Bold** for headings, `@font-face`d straight from
+  bayeight.com's own font directory. It is a licensed face, so the file is not
+  copied into this repo — their host sends `access-control-allow-origin: *`, so
+  the browser loads it cross-origin, and on bayeight.com it is same-origin
+  anyway. The `@font-face` declares `font-weight: 100 900` because the file
+  ships one cut; without that the browser fakes a bold on top of it.
 - Vanilla JS in `js/main.js`, ~200 lines.
 
 ## Structure
@@ -61,8 +67,10 @@ python3 -m http.server 8080
 - **Typography matches the live site**: body is Poppins 400 at `--text-base`
   17px / 1.8; section kickers (`.eyebrow`) are 22px → 20px → 18px with 1px
   letter-spacing; every section `h2` shares `--h2-size` (45px → 36px → 28px).
-  Their headings use Integral CF, a licensed font we can't ship — Montserrat 900
-  stands in for it.
+  Two of their weight values are inert on their side, because Integral CF ships
+  in one cut — read literally they make headings here look thin, so the hero
+  subtitle and the accordion title carry the weight their font really renders
+  at.
 - **One `<section>` per design section**, each with a stable `id`.
 - **Every section shares one left edge** — content sits in a Bootstrap
   `.container`. Blocks that bleed to a viewport edge (the Who We Are collage,
@@ -81,6 +89,9 @@ python3 -m http.server 8080
   `class="reveal-group"` to a container to stagger its children. The stagger has
   one `nth-child` rule per child up to 14 — extend it if a longer group appears.
   Both skip to the end state under `prefers-reduced-motion`.
+- **Below `lg` every section sits exactly 16px in from both screen edges**
+  (`.container` goes full-width there). The two moving strips pull that padding
+  back out so they still run edge to edge.
 - **Cache busting**: the `<link>` and `<script>` tags carry `?v=N`. **Bump it
   whenever you edit CSS or JS** — without it the browser keeps serving the
   cached copy and the change simply will not appear.
@@ -99,7 +110,7 @@ The favicon in `assets/icons/` is bayeight.com's own, in the three sizes their
 | Internships | Three-tile marquee looping left-to-right. **The two groups are identical** — that is what makes the loop seamless, so add or remove a shot in *both*. Pauses on hover, and can be dragged. |
 | Success Stories | Three white cards; the only place the palette inverts, so text colours are set explicitly. |
 | Apply Now | Front-end only. The form validates and shows an inline confirmation; nothing is submitted anywhere. |
-| FAQ | `<details>`/`<summary>` accordion — open/close, keyboard and find-in-page come free. |
+| FAQ | `<details>`/`<summary>` accordion — open/close, keyboard and find-in-page come free. The intro column is `position: sticky` and rides down with the list, which is why this section is `overflow: clip` and not `hidden`: `hidden` would make it the scroll container and kill the sticking. |
 
 ## Still to come from the client
 
