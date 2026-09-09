@@ -1,20 +1,22 @@
-# Bay Eight Studios — landing page
+# Bay Eight Studios — Careers page
 
-Static landing page for Bay Eight Studios (Miami recording studio).
-Built section by section from Canva designs, with <https://bayeight.com/> as the
-reference for brand, copy and structure.
+Static **Careers** page for Bay Eight Studios (Miami recording studio), built
+from the Canva mock ("bayeight.com mock-up — 2026 New Website", page 9) with
+<https://bayeight.com/> as the reference for brand, colour and typography.
+
+> This replaced an earlier landing-page design. Everything from that version —
+> the artists strip, studios carousel, services, reviews, booking steps, session
+> builder and the slide-in menu — has been removed.
 
 ## Stack
 
 Plain **HTML + CSS + JavaScript** with **Bootstrap 5.3**. No build step, no
 framework, no bundler — open the file and it runs.
 
-- Bootstrap 5.3.3 **CSS only** + Bootstrap Icons 1.11.3 (jsDelivr CDN).
-  The JS bundle is deliberately not loaded: the slide-in menu was the only
-  component in use, so `main.js` toggles Bootstrap's offcanvas classes itself.
-- Google Fonts: **Montserrat** (headings and body) + **Dancing Script**
-  (the "Miami" script in the header and footer lockups).
-- Vanilla JS in `js/main.js`, ~380 lines.
+- Bootstrap 5.3.3 **CSS only** + Bootstrap Icons 1.11.3 (jsDelivr CDN). The JS
+  bundle is deliberately not loaded; nothing on the page needs it.
+- Google Fonts: **Poppins** (body, 400) + **Montserrat** (headings).
+- Vanilla JS in `js/main.js`, ~110 lines.
 
 ## Structure
 
@@ -23,23 +25,19 @@ bayeight/
 ├── index.html        the whole page — one <section> per design section
 ├── css/style.css     design tokens in :root, then section-by-section styles
 ├── js/main.js        every interaction on the page (see below)
-└── assets/
-    ├── img/          artists/, studios/, sessions/, engineers/, logos/
-    └── video/        hero background video (not supplied yet)
+└── assets/img/       careers-hero.jpg, logo.png, culture/, sessions/
 ```
+
+Sections in order: `#hero` · `#who-we-are` · `#about` (The DNA of Bay Eight) ·
+`#internships` · `#success-stories` · `#contact` (Apply Now) · `#faq`.
 
 What `main.js` drives, in order:
 
 1. Header background once the page is scrolled
-2. Hero video fallback (hides the `<video>` if the file isn't there)
-3. Artists marquee — tracks which portrait is centred and names it
-4. Rail arrows for the suite and engineer carousels
-5. Click-to-play video facade (no YouTube payload until you press play)
-6. Session builder — live quote from room + add-ons × hours
-7. Contact form validation and inline success state
-8. Slide-in menu: backdrop, scroll lock, Escape, focus return
-9. Back-to-top button
-10. Scroll reveal + footer year
+2. Scroll reveal (`.reveal` / `.reveal-group`)
+3. Contact form validation and inline success state
+4. Back-to-top button
+5. Footer year
 
 ## Running it
 
@@ -49,81 +47,62 @@ python3 -m http.server 8080
 # → http://localhost:8080
 ```
 
-(Opening `index.html` directly in the browser also works.)
-
 ## Conventions
 
-- **Design tokens first.** Colors, fonts and spacing are CSS custom properties in
-  `:root` (`css/style.css`). Use `var(--accent)`, not a hard-coded hex.
-  `--accent` `#e82276` is the brand pink; `--lime` `#c8ff00` is the secondary.
-  The footer scopes its own brighter `--pink` to match the live site.
-- **One `<section>` per design section**, each with a stable `id` used by the
-  menu anchors.
-- **Every section shares one left edge.** Content sits in a Bootstrap
-  `.container`. Blocks that bleed off an edge (the welcome card, the studios
-  carousel) pull out with a negative margin and pad the same amount back in, so
-  their copy still lands on the container line at any width.
+- **Design tokens first.** Colours, fonts and sizes are CSS custom properties in
+  `:root` (`css/style.css`), lifted verbatim from bayeight.com's own Divi
+  variables. `--accent` `#ff1097` is their `--primary-color`; `--bg` `#0d0806`
+  is `--primary-black`; `--lime` `#bbe84a` is `--secondary-green`. Use
+  `var(--accent)`, not a hard-coded hex.
+- **Typography matches the live site**: body is Poppins 400 at `--text-base`
+  17px / 1.8; section kickers (`.eyebrow`) are 22px → 20px → 18px with 1px
+  letter-spacing; every section `h2` shares `--h2-size` (44px → 36px → 28px).
+  Their headings use Integral CF, a licensed font we can't ship — Montserrat 900
+  stands in for it.
+- **One `<section>` per design section**, each with a stable `id`.
+- **Every section shares one left edge** — content sits in a Bootstrap
+  `.container`. Blocks that bleed to a viewport edge (the Who We Are collage,
+  the internships strip) measure the gap from the *container's* max-width per
+  breakpoint, not from a percentage — a percentage in `margin-right` resolves
+  against the column, which is only 7/12 as wide, and overshoots badly.
 - **Bootstrap utilities for layout**, custom CSS only for what Bootstrap can't
-  express. Override Bootstrap through its CSS variables (`--bs-*`) rather than
-  fighting it with `!important`.
+  express. Override Bootstrap through its CSS variables (`--bs-*`).
 - **Motion**: add `class="reveal"` to fade a block up on entry, or
-  `class="reveal-group"` to a container to stagger its children. Both are driven
-  by the observer in `main.js` and skip to the end state under
-  `prefers-reduced-motion`.
-- **Cache busting**: the `<link>` and `<script>` tags carry `?v=N`. Bump it when
-  a browser keeps serving a stale stylesheet.
+  `class="reveal-group"` to a container to stagger its children. The stagger has
+  one `nth-child` rule per child up to 14 — extend it if a longer group appears.
+  Both skip to the end state under `prefers-reduced-motion`.
+- **Cache busting**: the `<link>` and `<script>` tags carry `?v=N`. **Bump it
+  whenever you edit CSS or JS** — without it the browser keeps serving the
+  cached copy and the change simply will not appear.
 - Images go in `assets/img/`, referenced with relative paths.
 
-## Status
+## Section notes
 
-Every section from the Canva mock is built.
-
-| Section | State |
+| Section | Notes |
 |---|---|
-| Header / menu | logo left, slide-in menu right |
-| Hero + Trusted By | grayscale still until the video lands; 11 label logos |
-| Artists (`#clients`) | auto-scrolling strip of 18 portraits, name card follows |
-| Welcome (`#about`) | copy + click-to-play video facade (YouTube `uGhjHFJnfww`) |
-| Our Studios | stats, Google rating, perks marquees, suite carousel |
-| Our Services | full-bleed poster strip + All Services link |
-| Our Reviews | two counter-scrolling marquee rows of Google review cards |
-| How to Book | 4 step cards over a studio backdrop, full-viewport section |
-| Our Engineers | 3-across carousel, arrows outside the container |
-| Build Your Session | live quote calculator (room + add-ons) × hours |
-| Ready to Record | details panel + validating form, inline success only |
-| FAQ | `<details>` accordion, full-viewport section |
-| Footer | full-viewport, palette matched to bayeight.com |
+| Hero | Still image, no video. `min-height: 650px` and the angled bottom divider are both taken from bayeight.com's About hero; the title carries their `text-shadow: .08em .08em 0 rgba(0,0,0,.4)`. |
+| Who We Are | Six-tile CSS grid that runs to within 10px of the right edge of the window. Tiles zoom on hover. |
+| The DNA of Bay Eight | Four trait cards sized to their own copy, so the rows stay ragged as in the mock. Two card colours (`#a8683f`, `#1f636e`) come from the mock, not from the brand ramp. |
+| Internships | Three-tile marquee looping left-to-right over 38s. **The two groups are identical** — that is what makes the loop seamless, so add or remove a shot in *both*. Pauses on hover. |
+| Success Stories | Three white cards; the only place the palette inverts, so text colours are set explicitly. |
+| Apply Now | Front-end only. The form validates and shows an inline confirmation; nothing is submitted anywhere. |
+| FAQ | `<details>`/`<summary>` accordion — open/close, keyboard and find-in-page come free. |
 
 ## Still to come from the client
 
 | What | Where it goes |
 |---|---|
-| Hero background video | `assets/video/hero.mp4` — the still is already wired as its poster |
-| Abbey Jo and Jeronimo "J Gross" Hernandez portraits | `assets/img/engineers/`, transparent PNG to match the GeeFlow cut-out |
-| The mock's Trusted By brands (Def Jam, Aveeno, Nike, Toronto, OVO Sound, Puma) | `assets/img/logos/` — the record-label logos the live site uses are standing in |
-| Full text of the Google reviews | `index.html`, reviews section — the mock only showed truncated snippets |
+| 2× exports of the Who We Are collage and internships photos | `assets/img/culture/` — the current files came out of Canva at mock scale (as small as 107px wide) and are soft when scaled up. Keep the same filenames and they drop straight in. |
 | BEMP partner logo | footer "Our Partners", currently a text wordmark |
-| Platinum-record and Grammy icons | studios stat strip, currently hand-drawn inline SVG |
-
-Copy that needs sign-off: the **FAQ answers** were drafted from facts already on
-bayeight.com (rates, minimums, opening hours, what's included) because the mock
-only carried placeholder text.
+| Real deposit, cancellation, guest and file-ownership policy | FAQ answers 8–11, which currently defer to a phone call rather than invent terms |
 
 ## Known gaps
 
-- The contact form has no backend. It validates and shows an inline
-  confirmation, but nothing is submitted anywhere. The mock also shows a
-  Cloudflare Turnstile widget; that needs a real site key once a submission
-  endpoint exists.
-- Two phone numbers appear in the mock — `305-705-2405` throughout and
-  `(305) 901-4913` in the footer — and two spellings of the address
-  (`Miami, FL 33162` vs `North Miami Beach, FL 33162`). Both are reproduced as
-  designed and need a decision.
-
-## Assets
-
-Photography and logos were pulled from bayeight.com, then resized to roughly
-twice their rendered size and recompressed — 4.9 MB down to 2.3 MB. Files that
-were already smaller than the re-encode were left untouched.
-`assets/img/artists/` holds 18 portraits, so more names can be added to the
-strip without another download.
+- **Room naming is inconsistent.** The FAQ and footer say *Apollo Room* (matching
+  the live site), the contact form's room picker says *Douglas Suite*. One of
+  them is wrong.
+- Two phone numbers appear in the mock — `305-705-2405` in the contact block and
+  `(305) 901-4913` in the footer. Both are reproduced as designed.
+- The footer's Services and Studios columns link out to `bayeight.com`, since
+  those pages don't exist on this one-page site. If this page is folded into the
+  main site, switch them to relative paths.
