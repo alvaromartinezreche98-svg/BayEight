@@ -13,7 +13,9 @@
 
   if (header) {
     const setHeaderState = () => {
-      header.classList.toggle('is-scrolled', window.scrollY > 40);
+      // Same threshold the landing uses — the frost lands as soon as the page
+      // leaves the very top, rather than waiting for 40px of travel.
+      header.classList.toggle('is-scrolled', window.scrollY > 8);
     };
     setHeaderState();
     window.addEventListener('scroll', setHeaderState, { passive: true });
@@ -106,95 +108,146 @@
   }
 
   /* ------------------------------------------------------------------
-     Marquees — the two photo strips. CSS animates them on its own; once this
-     runs it takes the animation over so the same track can also be dragged.
-     Falls back to the pure-CSS loop if this block never executes.
+     FAQ — one-at-a-time accordion, zigzag entrance, 3D cursor tilt.
+     Same choreography the bay-eight landing runs on GSAP, written
+     against plain transitions here so nothing extra has to load.
      ------------------------------------------------------------------ */
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const faqRoot = document.querySelector('[data-faq]');
 
-  if (!reducedMotion.matches) {
-    document.querySelectorAll('.culture-strip, .interns-strip').forEach((strip) => {
-      const track = strip.querySelector('.culture-track, .interns-track');
-      const group = track && track.firstElementChild;
-      if (!group) return;
+  if (faqRoot) {
+    const items = Array.from(faqRoot.querySelectorAll('[data-faq-item]'));
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Hand the animation over to us; the CSS keyframes stay as the fallback.
-      track.style.animation = 'none';
-      track.style.willChange = 'transform';
-      strip.classList.add('is-draggable');
+    /* ---- Accordion ---- */
+    const closeItem = (item) => {
+      const panel = item.querySelector('.faq-panel');
+      const btn = item.querySelector('.faq-toggle');
+      if (!panel || !btn || panel.hidden) return;
 
-      const SPEED = 26; // px per second, left to right — matches the CSS timing
-      let loop = 0;     // one group plus one gap: the distance a full cycle covers
-      let offset = 0;
-      let paused = false;
-      let dragging = false;
-      let startX = 0;
-      let startOffset = 0;
-      let last = 0;
+      item.classList.remove('is-open');
+      btn.setAttribute('aria-expanded', 'false');
 
-      const measure = () => {
-        const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-        loop = group.getBoundingClientRect().width + gap;
+      // From its measured height, so there is something to animate down from.
+      panel.style.transition = 'none';
+      panel.style.height = panel.scrollHeight + 'px';
+      panel.style.opacity = '1';
+      // Force the browser to take that height before the closing transition.
+      void panel.offsetHeight;
+      panel.style.transition =
+        'height 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53), opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53)';
+      panel.style.height = '0px';
+      panel.style.opacity = '0';
+
+      const done = () => {
+        panel.hidden = true;
+        panel.style.transition = '';
+        panel.removeEventListener('transitionend', onEnd);
       };
-      measure();
-      window.addEventListener('resize', measure);
-
-      const wrap = () => {
-        if (!loop) return;
-        // Keep offset inside [0, loop) so the transform never grows unbounded
-        offset = ((offset % loop) + loop) % loop;
+      const onEnd = (event) => {
+        if (event.target === panel && event.propertyName === 'height') done();
       };
+      if (reduced) done();
+      else panel.addEventListener('transitionend', onEnd);
+    };
 
-      const draw = () => { track.style.transform = 'translateX(' + -offset + 'px)'; };
+    const openItem = (item) => {
+      const panel = item.querySelector('.faq-panel');
+      const btn = item.querySelector('.faq-toggle');
+      if (!panel || !btn) return;
 
-      const frame = (now) => {
-        const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
-        last = now;
-        if (!paused && !dragging) {
-          offset -= SPEED * dt;
-          wrap();
-          draw();
-        }
-        requestAnimationFrame(frame);
+      item.classList.add('is-open');
+      btn.setAttribute('aria-expanded', 'true');
+      panel.hidden = false;
+
+      panel.style.transition = 'none';
+      panel.style.height = '0px';
+      panel.style.opacity = '0';
+      void panel.offsetHeight;
+      panel.style.transition =
+        'height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      panel.style.height = panel.scrollHeight + 'px';
+      panel.style.opacity = '1';
+
+      const onEnd = (event) => {
+        if (event.target !== panel || event.propertyName !== 'height') return;
+        // Back to auto so the answer can reflow if the window is resized.
+        panel.style.height = 'auto';
+        panel.style.transition = '';
+        panel.removeEventListener('transitionend', onEnd);
       };
-      offset = loop;
-      wrap();
-      draw();
-      requestAnimationFrame(frame);
+      panel.addEventListener('transitionend', onEnd);
+    };
 
-      strip.addEventListener('pointerenter', () => { paused = true; });
-      strip.addEventListener('pointerleave', () => { paused = false; });
+    items.forEach((item) => {
+      const btn = item.querySelector('.faq-toggle');
+      if (!btn) return;
 
-      strip.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0 && event.pointerType === 'mouse') return;
-        dragging = true;
-        startX = event.clientX;
-        startOffset = offset;
-        strip.setPointerCapture(event.pointerId);
-        strip.classList.add('is-dragging');
+      btn.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('is-open');
+        // One at a time — opening a question closes whatever else is open.
+        items.forEach((other) => {
+          if (other !== item) closeItem(other);
+        });
+        if (wasOpen) closeItem(item);
+        else openItem(item);
+      });
+    });
+
+    /* ---- Zigzag entrance ---- */
+    if (reduced) {
+      items.forEach((item) => item.classList.add('is-in'));
+    } else {
+      const enter = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            observer.unobserve(entry.target);
+            const i = items.indexOf(entry.target);
+            // Same 40ms-per-card cascade the landing uses.
+            setTimeout(() => entry.target.classList.add('is-in'), Math.max(i, 0) * 40);
+          });
+        },
+        { threshold: 0.05, rootMargin: '0px 0px -10% 0px' }
+      );
+      items.forEach((item) => enter.observe(item));
+    }
+
+  }
+
+  /* ------------------------------------------------------------------
+     3D cursor tilt — the FAQ cards and the Success Stories cards, the
+     same treatment the landing gives .engineer-card / .faq-item /
+     .review-card: ±9deg following the pointer, settling back slower
+     than it tracks.
+     ------------------------------------------------------------------ */
+  const tiltReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (finePointer && !tiltReduced) {
+    document.querySelectorAll('.faq-item, .story').forEach((card) => {
+      let frame = 0;
+
+      card.addEventListener('mouseenter', () => card.classList.add('is-tilting'));
+
+      card.addEventListener('mousemove', (event) => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const box = card.getBoundingClientRect();
+          const px = (event.clientX - box.left) / box.width - 0.5;
+          const py = (event.clientY - box.top) / box.height - 0.5;
+          card.style.transform =
+            'perspective(1000px) rotateX(' + (-py * 9).toFixed(2) + 'deg) rotateY(' +
+            (px * 9).toFixed(2) + 'deg)';
+        });
       });
 
-      strip.addEventListener('pointermove', (event) => {
-        if (!dragging) return;
-        // Drag right, the strip follows right
-        offset = startOffset - (event.clientX - startX);
-        wrap();
-        draw();
+      card.addEventListener('mouseleave', () => {
+        if (frame) { cancelAnimationFrame(frame); frame = 0; }
+        // Dropping the class hands the settle back to the slower curve.
+        card.classList.remove('is-tilting');
+        card.style.transform = '';
       });
-
-      const endDrag = (event) => {
-        if (!dragging) return;
-        dragging = false;
-        strip.classList.remove('is-dragging');
-        if (event && event.pointerId != null && strip.hasPointerCapture(event.pointerId)) {
-          strip.releasePointerCapture(event.pointerId);
-        }
-      };
-      strip.addEventListener('pointerup', endDrag);
-      strip.addEventListener('pointercancel', endDrag);
-
-      // A drag that ends over an image would otherwise fire a click on it
-      strip.addEventListener('dragstart', (event) => event.preventDefault());
     });
   }
 

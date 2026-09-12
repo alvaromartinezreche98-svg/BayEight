@@ -6,19 +6,40 @@
 
 /* --------------------------------------------------------------------------
    Fonts
-   Integral CF is the licensed face bayeight.com sets its headings in. It is
-   referenced from their own server rather than copied into this repo — their
-   host sends access-control-allow-origin:*, so the browser can load it cross
-   origin, and once this page lives on bayeight.com it is same-origin anyway.
-   Montserrat stays in the stack as the swap fallback.
-   The file ships a single cut, so the weight range keeps the browser from
-   synthesising a fake bold on top of it.
+   Integral CF is the licensed face the headings are set in. The four cuts the
+   bay-eight landing ships now live in this repo too, so the weights it leans on
+   are all real: 400 for the footer link lists, 900 for every wordmark and
+   heading. Previously only ExtraBold was pulled off bayeight.com, which left
+   the browser synthesising the rest.
+   The stack keeps generic fallbacks only — Big Shoulders / Anton used to be
+   requested from Google Fonts as stand-ins, but with all four cuts bundled
+   they never rendered, so the request went.
    -------------------------------------------------------------------------- */
 @font-face {
-  font-family: "Integral CF - extra bold";
-  src: url("https://bayeight.com/wp-content/uploads/et-fonts/IntegralCF-ExtraBold-2.otf")
-       format("opentype");
-  font-weight: 100 900;
+  font-family: "Integral CF";
+  src: url("../assets/fonts/integral-cf/IntegralCF-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Integral CF";
+  src: url("../assets/fonts/integral-cf/IntegralCF-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Integral CF";
+  src: url("../assets/fonts/integral-cf/IntegralCF-ExtraBold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Integral CF";
+  src: url("../assets/fonts/integral-cf/IntegralCF-Heavy.otf") format("opentype");
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
@@ -44,15 +65,47 @@
 
   /* The rest of their secondary ramp */
   --lime:          #bbe84a;   /* their --secondary-green */
-  --font-body:     'Poppins', Helvetica, Arial, Lucida, sans-serif;
-  --font-display:  'Integral CF - extra bold', 'Montserrat', Helvetica, Arial, sans-serif;
-  --text-base:     17px;
+
+  /* ---- Landing palette ------------------------------------------------
+     The values the bay-eight landing paints its header and footer with.
+     Kept as their own tokens so the rest of the page stays on the Divi
+     ramp above and only the two chrome bands adopt these. */
+  --l-pink:        #E82276;
+  --l-lime:        #C8F03B;
+  --l-cream:       #f7f4eb;
+  --l-panel:       #111111;
+
+  /* Same two stacks the landing uses — Integral CF for display, Inter for
+     everything else. Poppins is gone; the page is one type family now. */
+  --font-body:     'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display:  'Integral CF', Impact, 'Haettenschweiler', sans-serif;
+  /* The landing's body metrics: 16px/1.6 rather than Poppins' 17px/1.8 */
+  --text-base:     16px;
+  /* Section body copy runs a step above --text-base on the landing — every
+     section description there measures 17.6px/26.4px at desktop, against the
+     flat 16px these paragraphs used to carry. Card-level copy stays small
+     (the landing's own card text is 13-14px), so this is only for the
+     paragraphs that sit directly in a section. */
+  --body-size:     clamp(0.95rem, 1.2vw, 1.1rem);
+  --body-lh:       1.5;
   /* their section h2 (.et_pb_text_35 h2 and friends) is a flat 44px */
   --h2-size:       45px;
-  --text-lh:       1.8;
+  --text-lh:       1.6;
+
+  /* Shared easing the landing's chrome transitions on */
+  --l-ease:        cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* CSS equivalents of the GSAP curves the landing animates its FAQ with */
+  --ease-p2out:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-p2in:     cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  --ease-p3out:    cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-sine:     cubic-bezier(0.445, 0.05, 0.55, 0.95);
 
   /* Rhythm */
-  --nav-h:         104px;
+  /* How tall the fixed header actually renders: 1.25rem of padding top and
+     bottom around the wordmark, same as the landing. Only used by
+     scroll-padding-top and the hero's top padding — the header itself sizes
+     to its content so its height never changes between states. */
+  --nav-h:         117px;
   /* Every section breathes by the same amount, top and bottom */
   --section-pad:   116px;
   /* Gap between tiles in both photo strips */
@@ -71,9 +124,6 @@
     max-width: none;
     padding-inline: 16px;
   }
-
-  .culture-strip,
-  .interns-strip { margin-inline: -16px; }
 }
 
 /* --------------------------------------------------------------------------
@@ -97,7 +147,7 @@ body {
   background-color: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
-  /* Poppins 400 at 17px/1.8 — the values bayeight.com sets on body and p */
+  /* Inter 400 at 16px/1.6 — the body metrics the bay-eight landing runs on */
   font-weight: 400;
   font-size: var(--text-base);
   line-height: var(--text-lh);
@@ -136,8 +186,8 @@ a { transition: color 0.3s ease-in-out; }
   margin-bottom: 0.35rem;
 }
 
-@media (max-width: 980px) { .eyebrow { font-size: 20px; } }
-@media (max-width: 767px) { .eyebrow { font-size: 18px; } }
+@media (max-width: 980px) { .eyebrow:not(.stories-eyebrow) { font-size: 20px; } }
+@media (max-width: 767px) { .eyebrow:not(.stories-eyebrow) { font-size: 18px; } }
 
 /* Their big h2 steps down the same way the footer h2 does (42 / 36 / 22) */
 @media (max-width: 980px) { :root { --h2-size: 36px; } }
@@ -150,13 +200,35 @@ a { transition: color 0.3s ease-in-out; }
 /* The one fixed size with no step of its own */
 @media (max-width: 767px) { .dna-chip { font-size: 24px; } }
 
-/* Their footer wordmark steps 42 / 36 / 22 */
-@media (max-width: 980px) { .footer-shout { font-size: 44px; } }
-@media (max-width: 767px) { .footer-shout { font-size: 28px; } }
 
 
 /* --------------------------------------------------------------------------
+   Icons
+   The bootstrap-icons font is gone; these are <use> references into the sprite
+   at the top of <body>. Sized in em and painted with currentColor so every
+   rule that used to size the old <i class="bi"> through font-size still works,
+   and vertical-align matches what the font glyph sat at.
+   -------------------------------------------------------------------------- */
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
    Brand lockup — stacked wordmark + script "Miami"
+   The contact card still uses the plain text lockup; the header has its own
+   larger version below.
    -------------------------------------------------------------------------- */
 .brand {
   display: inline-flex;
@@ -176,46 +248,118 @@ a { transition: color 0.3s ease-in-out; }
   text-transform: uppercase;
 }
 
-/* Image logo used in the header and footer. The contact block still uses the
-   text lockup above, so both sets of rules stay. */
-.brand-logo {
-  display: block;
-  width: auto;
-  height: clamp(3.75rem, 6vw, 5rem);
-  max-width: 100%;
-  transition: height 0.3s ease;
-}
-
-/* The header shrinks from 104px to 72px on scroll, so the logo follows it down. */
-.site-header.is-scrolled .brand-logo {
-  height: clamp(3rem, 4.2vw, 3.5rem);
-}
-
-.footer-brand .brand-logo {
-  height: clamp(4rem, 6vw, 5rem);
-}
-
 /* --------------------------------------------------------------------------
    Header
+   Transparent over the hero; frosted once .is-scrolled lands.
    -------------------------------------------------------------------------- */
+/* Sized by its own padding, exactly like the landing's: sticking only paints
+   a background, a blur and a hairline — the bar never changes height. It used
+   to shrink 104px → 76px on scroll, which clipped the 77px wordmark (its top
+   landed at -1px) and made the logo jump. */
 .site-header {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 1030;
-  height: var(--nav-h);
+  padding-block: 1.25rem;
   display: flex;
   align-items: center;
-  transition: height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s var(--l-ease), border-color 0.3s var(--l-ease),
+              backdrop-filter 0.3s var(--l-ease);
   border-bottom: 1px solid transparent;
 }
 
-.site-header > .container-fluid { width: 100%; }
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  max-width: none;
+  padding-inline: clamp(1.25rem, 3.5vw, 2.5rem);
+}
 
 .site-header.is-scrolled {
-  height: 72px;
-  background-color: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(14px);
-  border-bottom-color: var(--line);
+  background-color: rgba(5, 5, 5, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom-color: rgba(247, 244, 235, 0.06);
+}
+
+/* ---- Wordmark ----
+   "BAY / EIGHT / STUDIOS" stacked in Integral CF Heavy with the script
+   "Miami" tucked under its right edge — set in type, not shipped as a PNG. */
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+  color: var(--l-pink);
+}
+
+.logo:hover { color: var(--l-pink); }
+
+.logo__stack {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(0.95rem, 1.2vw, 1.2rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--l-pink);
+}
+
+.logo__line { display: block; }
+
+.logo__miami {
+  align-self: flex-end;
+  width: clamp(38px, 4vw, 56px);
+  height: auto;
+  margin-top: 0.05em;
+  /* Overhangs the right edge of "STUDIOS", the way the script sits on the
+     landing's lockup. */
+  margin-right: -1rem;
+}
+
+/* ---- Sticky phone CTA (phones only) ----
+   Kept out of the way until the header has a background to sit on. */
+.site-header__cta {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(247, 244, 235, 0.85);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s var(--l-ease), visibility 0.3s;
+}
+
+.site-header__cta-tel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 900;
+  color: var(--l-pink);
+}
+
+.site-header__cta-tel:hover { color: var(--l-lime); }
+
+.site-header__cta-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 0.95em;
+}
+
+.site-header.is-scrolled .site-header__cta {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (min-width: 721px) {
+  .site-header__cta { display: none; }
 }
 
 /* --------------------------------------------------------------------------
@@ -318,9 +462,9 @@ a { transition: color 0.3s ease-in-out; }
 
 /* Their subtitle is an <h4>, so the global h1–h6 rule gives it Integral CF
    *Extra Bold* and letter-spacing:1px. The module's font-weight:600 and the
-   span's inline font-weight:400 are both inert there — that face ships in one
-   weight. Montserrat does have weights, so it takes 800 to read as heavy as
-   theirs. Size is their module's 29px. */
+   span's inline font-weight:400 are both inert against what actually renders
+   there, so 800 is spelled out to land on the ExtraBold cut.
+   Size is their module's 29px. */
 .hero-tagline {
   font-family: var(--font-display);
   font-weight: 800;
@@ -356,6 +500,9 @@ a { transition: color 0.3s ease-in-out; }
    SECTION 2 — Who we are
    -------------------------------------------------------------------------- */
 .culture {
+  /* The collage runs out to the window's right edge, so the section clips it.
+     `clip` rather than `hidden` — hidden would make this a scroll container. */
+  overflow: clip;
   background-color: var(--bg);
   padding-block: var(--section-pad);
 }
@@ -379,8 +526,8 @@ a { transition: color 0.3s ease-in-out; }
 
 .culture-text {
   color: var(--muted);
-  font-size: var(--text-base);
-  line-height: var(--text-lh);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
   max-width: 34rem;
   /* Stops a single word being left alone on the last line. Ignored by browsers
      that don't support it, so the wider column above does the real work. */
@@ -390,86 +537,37 @@ a { transition: color 0.3s ease-in-out; }
 
 .culture-text:last-child { margin-bottom: 0; }
 
-/* Six tiles on one grid. Columns 3 and 4 carry the wide shot on the top row and
-   the two small shots underneath, so the whole block stays a single grid rather
-   than nested rows. */
-/* The mosaic scrolls, so it needs a definite width for the fr columns to
-   resolve against and for the flex track to measure with max-content. */
+/* Six tiles on one grid. The two outer columns carry the tall shots, the wide
+   shot sits across columns 3-4 on the top row with the two small ones under it.
+   One grid, no nested rows. */
 .culture-collage {
   display: grid;
-  /* Outer columns share one width so the two tall tiles mirror each other */
-  grid-template-columns: 1fr 1.75fr 1.7fr 1fr;
+  grid-template-columns: 1.15fr 0.85fr 1.75fr 1.7fr 1fr;
   grid-template-rows: 1.7fr 1fr;
   gap: var(--photo-gap);
-  flex: 0 0 auto;
-  width: clamp(28rem, 52vw, 48rem);
+  /* No `width` — a block box with width:100% is over-constrained, and the
+     negative right margin below would be dropped instead of widening it. */
   height: clamp(20rem, 30vw, 29rem);
-}
-
-/* Two identical groups on a flex track sliding by exactly -50%, less half the
-   gap so the seam spaces like every other join. Stays inside its column — no
-   bleed to the window edge. */
-.culture-strip {
-  --strip-gap: var(--photo-gap);
-  overflow: hidden;
 }
 
 /* Runs flush to the right edge of the window.
 
    The distance has to be measured against the *container*, not this element: a
-   percentage in `margin-right` resolves against the column, which is only 63%
+   percentage in `margin-right` resolves against the column, which is only 7/12
    as wide, so `calc(50vw - 50%)` overshoots badly. Bootstrap's container
    max-width is a known constant per breakpoint, so it is used directly
-   (+12px for the container's own padding). */
-@media (min-width: 992px) {
-  .culture-strip {
-    --edge: calc((100vw - 960px) / 2 + 12px);
-    margin-right: calc(-1 * var(--edge));
-  }
-}
-
-@media (min-width: 1200px) { .culture-strip { --edge: calc((100vw - 1140px) / 2 + 12px); } }
-@media (min-width: 1400px) { .culture-strip { --edge: calc((100vw - 1320px) / 2 + 12px); } }
-
-.culture-track {
-  display: flex;
-  width: max-content;
-  gap: var(--strip-gap);
-  animation: culture-loop 48s linear infinite reverse;
-}
-
-@keyframes culture-loop {
-  to { transform: translateX(calc(-50% - var(--strip-gap) / 2)); }
-}
-
-.culture-strip:hover .culture-track,
-.culture-strip:focus-within .culture-track { animation-play-state: paused; }
-
-/* Added by main.js once it takes the animation over — signals the strip can be
-   dragged, and stops the browser's own image-drag and text selection. */
-.is-draggable {
-  cursor: grab;
-  touch-action: pan-y;
-}
-
-.is-draggable.is-dragging { cursor: grabbing; }
-
-.is-draggable img {
-  user-select: none;
-  -webkit-user-drag: none;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .culture-track { animation: none; }
-  .culture-strip { overflow-x: auto; }
-}
-
+   (+12px for the container's own padding) — which lands the grid's right edge
+   exactly on the viewport's, with nothing spilling past it. */
 @media (min-width: 992px) {
   .culture-collage {
-    height: clamp(24rem, 36vw, 34rem);
+    --edge: calc((100vw - 960px) / 2 + 12px);
+    margin-right: calc(-1 * var(--edge));
+    height: clamp(22rem, 34vw, 33rem);
   }
 }
+
+@media (min-width: 1200px) { .culture-collage { --edge: calc((100vw - 1140px) / 2 + 12px); } }
+@media (min-width: 1400px) { .culture-collage { --edge: calc((100vw - 1320px) / 2 + 12px); } }
 
 .culture-shot {
   margin: 0;
@@ -499,20 +597,20 @@ a { transition: color 0.3s ease-in-out; }
 }
 
 .culture-shot--a { grid-column: 1; grid-row: 1 / 3; }
-.culture-shot--c { grid-column: 2 / 4; grid-row: 1; }
-.culture-shot--d { grid-column: 2; grid-row: 2; }
-.culture-shot--e { grid-column: 3; grid-row: 2; }
-.culture-shot--f { grid-column: 4; grid-row: 1 / 3; }
+.culture-shot--b { grid-column: 2; grid-row: 1 / 3; }
+.culture-shot--c { grid-column: 3 / 5; grid-row: 1; }
+.culture-shot--d { grid-column: 3; grid-row: 2; }
+.culture-shot--e { grid-column: 4; grid-row: 2; }
+.culture-shot--f { grid-column: 5; grid-row: 1 / 3; }
 
 /* Under lg the copy stacks above the collage, so the five-column strip is far
    too thin. Drop to three columns and let the wide shot lead. */
 @media (max-width: 991.98px) {
-  .culture-strip { margin-top: 2rem; }
-
   .culture-collage {
+    margin-top: 2rem;
+    margin-right: 0;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: 1.35fr 1fr;
-    width: clamp(20rem, 92vw, 34rem);
     height: clamp(17rem, 52vw, 24rem);
   }
 
@@ -521,6 +619,8 @@ a { transition: color 0.3s ease-in-out; }
   .culture-shot--d { grid-column: 1; grid-row: 2; }
   .culture-shot--e { grid-column: 2; grid-row: 2; }
   .culture-shot--f { grid-column: 3; grid-row: 2; }
+  /* Six cells, six tiles — the narrow guitar shot has nowhere to go here. */
+  .culture-shot--b { display: none; }
 }
 /* --------------------------------------------------------------------------
    Shared heading trio — used by Studios, Services, Reviews, Booking,
@@ -609,8 +709,8 @@ a { transition: color 0.3s ease-in-out; }
 
 .dna-text {
   color: var(--ink);
-  font-size: var(--text-base);
-  line-height: var(--text-lh);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
   max-width: 46rem;
   margin-bottom: clamp(1.25rem, 2.2vw, 2rem);
 }
@@ -627,8 +727,16 @@ a { transition: color 0.3s ease-in-out; }
   display: flex;
   flex-wrap: wrap;
   justify-content: start;
-  /* row gap stays 20px; the columns get a wider gutter */
-  gap: 20px 34px;
+  /* Both gutters come off the mock, where the boxes sit much closer than they
+     did here: the row gap measures ~1.0% of the artboard width and the column
+     gap ~1.5%, against the flat 20/34px this used to run. */
+  /* --dna-row-gap is the gap you should SEE between the two rows. The actual
+     row-gap is half of it: .dna-break is a full-width, zero-height flex item,
+     so it forms a flex line of its own and the rows end up a row-gap apart
+     twice over. (A negative margin on the break does not work — a flex line's
+     cross size clamps at zero.) */
+  --dna-row-gap: clamp(0.65rem, 1.05vw, 0.95rem);
+  gap: calc(var(--dna-row-gap) / 2) clamp(1rem, 1.5vw, 1.4rem);
   max-width: 100%;
 }
 
@@ -638,15 +746,21 @@ a { transition: color 0.3s ease-in-out; }
   margin: 0;
 }
 
-/* Only the first card of the second row steps in, echoing the mock's stagger */
-.dna-break + .dna-card { margin-left: clamp(0.5rem, 1.6vw, 1.25rem); }
+/* Only the first card of the second row steps in, echoing the mock's stagger —
+   which measures ~2.35% of the artboard, not the ~1.5% this used to use. */
+.dna-break + .dna-card { margin-left: clamp(0.85rem, 2.35vw, 2rem); }
 
+/* The boxes in the mock are hand-drawn rectangles with far more air around
+   their copy than a content-hugging card gives you — the side padding measures
+   ~40px at the artboard's width against the ~23px here, and the box stands
+   ~113px tall against ~100px. Widening the padding is what closes both gaps:
+   three of the four boxes then land within a point of the mock's proportions. */
 .dna-card {
   --dna-fill: var(--accent);
   flex: 0 0 auto;
   background-color: var(--dna-fill);
   border-radius: clamp(16px, 1.8vw, 24px);
-  padding: clamp(0.7rem, 1vw, 0.95rem) clamp(1rem, 1.7vw, 1.5rem);
+  padding: clamp(0.95rem, 1.5vw, 1.4rem) clamp(1.6rem, 2.9vw, 2.6rem);
   text-align: left;
   max-width: 100%;
 }
@@ -662,7 +776,11 @@ a { transition: color 0.3s ease-in-out; }
   color: #000;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 30px;
+  /* Was a flat 30px. "PERSONALITY" at that size measures 279px, which is wider
+     than the card's content box on a 320px phone — it was the one thing still
+     pushing the document past the viewport there. Holds 30px from 1364px up,
+     which is where the mock was measured. */
+  font-size: clamp(1.15rem, 2.2vw, 1.875rem);
   line-height: 1.1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -712,7 +830,7 @@ a { transition: color 0.3s ease-in-out; }
 
 
 .google-title {
-  font-size: clamp(0.7rem, 0.85vw, 0.82rem);
+  font-size: clamp(0.75rem, 0.85vw, 0.82rem);
   font-weight: 700;
   line-height: 1.25;
   color: #0d0806;
@@ -764,7 +882,8 @@ a { transition: color 0.3s ease-in-out; }
 
 
 .google-reviews small {
-  font-size: 0.62em;
+  /* 0.62em alone bottomed out at 7.4px on a phone. */
+  font-size: max(0.6rem, 0.62em);
   font-weight: 700;
 }
 
@@ -774,12 +893,19 @@ a { transition: color 0.3s ease-in-out; }
 .interns {
   background-color: var(--bg);
   padding-block: var(--section-pad);
+  /* Same as .culture — the tile row runs out to the window's right edge, so
+     the section clips it. `clip` rather than `hidden`: hidden would make this
+     a scroll container. */
+  overflow: clip;
 }
 
 /* A wider gutter than the shared g-lg-5, which also narrows the copy column a
-   little so the paragraph's last line carries more than a couple of words. */
+   little so the paragraph's last line carries more than a couple of words.
+   Clamped rather than flat 5.5rem: at exactly 1200px the container is 1140 and
+   a flat 88px gutter pushed the row 2px past the viewport, which was enough to
+   put a horizontal scrollbar on the page. */
 @media (min-width: 992px) {
-  .interns .row { --bs-gutter-x: 5.5rem; }
+  .interns .row { --bs-gutter-x: clamp(3rem, 5vw, 5.5rem); }
 }
 
 .interns-title {
@@ -795,8 +921,8 @@ a { transition: color 0.3s ease-in-out; }
 
 .interns-text {
   color: var(--ink);
-  font-size: var(--text-base);
-  line-height: var(--text-lh);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
   /* Fills the col-lg-6 it sits in — 34rem left ~90px of dead space on the right */
   max-width: 40rem;
   /* Keeps the last line from ending on a single orphaned word */
@@ -806,48 +932,28 @@ a { transition: color 0.3s ease-in-out; }
 
 .interns-text:last-child { margin-bottom: 0; }
 
-/* Three equal tiles. On lg the strip runs past the right edge of the viewport
-   so the last one is cut — body's overflow-x: clip does the cutting, which
-   keeps it from adding a horizontal scrollbar. */
-/* Slow, seamless loop. The track holds two identical groups and slides by
-   exactly -50%, so the hand-off is invisible. */
-.interns-strip {
-  --tile: clamp(9.5rem, 16vw, 16.5rem);
-  --tile-gap: var(--photo-gap);
-  overflow: hidden;
+/* Three equal tiles. Like the Who We Are collage, the row runs flush to the
+   right edge of the window — same `--edge` measurement off the container's
+   max-width, and the same reason for setting no `width` here: a block box at
+   width:100% is over-constrained and the negative margin would be dropped. */
+.interns-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--photo-gap);
 }
 
-.interns-track {
-  display: flex;
-  width: max-content;
-  gap: var(--tile-gap);
-  /* reverse so the tiles travel left-to-right */
-  animation: interns-loop 38s linear infinite reverse;
+@media (min-width: 992px) {
+  .interns-row {
+    --edge: calc((100vw - 960px) / 2 + 12px);
+    margin-right: calc(-1 * var(--edge));
+  }
 }
 
-.interns-group {
-  display: flex;
-  gap: var(--tile-gap);
-}
-
-@keyframes interns-loop {
-  /* half the gap keeps the seam evenly spaced with every other tile */
-  to { transform: translateX(calc(-50% - var(--tile-gap) / 2)); }
-}
-
-/* Pointing at the strip stops it, so a shot can actually be looked at */
-.interns-strip:hover .interns-track,
-.interns-strip:focus-within .interns-track { animation-play-state: paused; }
-
-@media (prefers-reduced-motion: reduce) {
-  .interns-track { animation: none; }
-  .interns-strip { overflow-x: auto; }
-}
+@media (min-width: 1200px) { .interns-row { --edge: calc((100vw - 1140px) / 2 + 12px); } }
+@media (min-width: 1400px) { .interns-row { --edge: calc((100vw - 1320px) / 2 + 12px); } }
 
 .interns-shot {
   margin: 0;
-  flex: 0 0 var(--tile);
-  width: var(--tile);
   overflow: hidden;
   border-radius: clamp(10px, 1.1vw, 16px);
   background-color: var(--surface);
@@ -861,15 +967,8 @@ a { transition: color 0.3s ease-in-out; }
   display: block;
 }
 
-@media (min-width: 992px) {
-  .interns-strip {
-    --bleed: calc(50vw - 50%);
-    margin-right: calc(-1 * var(--bleed) - clamp(2rem, 6vw, 7rem));
-  }
-}
-
 @media (max-width: 991.98px) {
-  .interns-strip { margin-top: 2rem; --tile: clamp(8.5rem, 34vw, 13rem); }
+  .interns-row { margin-top: 2rem; margin-right: 0; }
 }
 
 /* --------------------------------------------------------------------------
@@ -896,36 +995,63 @@ a { transition: color 0.3s ease-in-out; }
   background-color: rgba(0, 0, 0, 0.86);
 }
 
+/* Eyebrow and title are both set from the mock rather than from --h2-size /
+   the shared .eyebrow step. Measured against the artboard: "SUCCESS STORIES"
+   runs 2.34% of its width per em and "A PRODUCT OF THE BAY" 3.9%, which is
+   where the two vw figures come from. Both sit on the container's left edge;
+   only the card grid and the CTA below them are centred. */
+.stories-eyebrow {
+  font-size: clamp(1.25rem, 2.34vw, 2.6rem);
+  line-height: 1;
+  margin-bottom: 0.2em;
+}
+
 .stories-title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: var(--h2-size);
-  line-height: 1.08;
-  letter-spacing: 1px;
+  font-size: clamp(2.4rem, 3.9vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: 0.005em;
   text-transform: uppercase;
   color: var(--ink);
   margin-bottom: clamp(1.75rem, 3vw, 2.75rem);
 }
 
+/* In the mock the cards sit centred in a block narrower than the container
+   (~72% of the artboard), and each one ends where its own quote ends — they
+   are not levelled off to a shared height. */
 .stories-grid {
   list-style: none;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
+  max-width: min(100%, 72vw);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* stretch, not start — the three cards share the tallest height */
-  align-items: stretch;
-  /* Wider gutters pull the three equal columns in, so each card sits tighter */
-  gap: clamp(1.5rem, 3.4vw, 3.25rem);
+  align-items: start;
+  gap: clamp(1.25rem, 3.4vw, 3.5rem);
 }
 
 /* White cards on a dark page — the only place the palette inverts, so the
    text colours are set here rather than inherited. */
 .story {
   background-color: #fff;
-  border-radius: clamp(12px, 1.4vw, 18px);
-  padding: clamp(1.25rem, 1.8vw, 1.75rem);
+  border-radius: clamp(10px, 1.1vw, 14px);
+  /* Tighter than before — the mock's cards sit at about 5% of their own width
+     in padding, where these were running at 7%. */
+  padding: clamp(0.9rem, 1.2vw, 1.25rem);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  /* Hover is the landing's engineer-card treatment: main.js writes a 3D tilt
+     that follows the cursor. Two speeds, same as the FAQ cards — the short
+     curve while the pointer moves, the long one to settle on leave. */
+  transition: transform 0.7s var(--ease-p3out), box-shadow 0.25s var(--l-ease);
+}
+
+.story.is-tilting {
+  transition: transform 0.35s var(--ease-p2out), box-shadow 0.25s var(--l-ease);
+}
+
+.story:hover {
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
 }
 
 .story-photo {
@@ -957,7 +1083,7 @@ a { transition: color 0.3s ease-in-out; }
 .story-role {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(0.66rem, 0.78vw, 0.75rem);
+  font-size: clamp(0.72rem, 0.78vw, 0.75rem);
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: #000;
@@ -968,13 +1094,44 @@ a { transition: color 0.3s ease-in-out; }
   margin: 0;
   color: #3f3f46;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .stories-cta {
   margin-top: clamp(1.75rem, 3vw, 2.75rem);
   text-align: center;
 }
+
+/* The mock draws this as a lime rectangle with a small radius, not the rounded
+   pill it used to be — same treatment as the footer's CTA. Sized off the
+   artboard again: the label runs 1.85% of its width per em. */
+.stories-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.3rem, 0.5vw, 0.45rem) clamp(1.4rem, 2.5vw, 2.3rem);
+  background-color: var(--l-lime);
+  color: #050505;
+  border: 1px solid var(--l-lime);
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.05rem, 1.85vw, 1.95rem);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background-color 0.2s var(--l-ease), color 0.2s var(--l-ease),
+              border-color 0.2s var(--l-ease), transform 0.2s var(--l-ease);
+}
+
+.stories-btn:hover {
+  background-color: #0a0a0a;
+  color: var(--l-lime);
+  transform: translateY(-2px);
+}
+
+.stories-btn:active { transform: translateY(0); }
 
 @media (max-width: 991.98px) {
   .stories-grid { grid-template-columns: 1fr; max-width: 26rem; }
@@ -985,25 +1142,36 @@ a { transition: color 0.3s ease-in-out; }
 .contact {
   background-color: var(--bg);
   padding-block: var(--section-pad);
-  text-align: center;
 }
 
-/* Same 45px step as every other section heading — it used to run to 72px */
+/* Set from the mock, not from --h2-size: there the title sits on the
+   container's left edge (not centred) and runs much larger than a section
+   heading — "APPLY NOW" measures 3.84% of the artboard width per em, which
+   is where the 3.85vw comes from. */
 .contact-head {
+  display: block;
+  text-align: left;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: var(--h2-size);
-  line-height: 1.08;
-  letter-spacing: 1px;
+  font-size: clamp(2.4rem, 3.85vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: 0.005em;
   text-transform: uppercase;
   color: var(--ink);
   margin-bottom: clamp(1.75rem, 3.2vw, 2.75rem);
 }
 
+/* In the mock the dot is chunky — it clears the cap height top and bottom,
+   where every other bullet on the page sits at half that. */
 .contact-head .welcome-dot {
-  width: 0.36em;
-  height: 0.36em;
-  margin-right: 0.35em;
+  width: 0.8em;
+  height: 0.8em;
+  margin-right: 0.5em;
+  background-color: var(--l-pink);
+  opacity: 0.6;
+  /* vertical-align:middle centres the dot on the x-height; the cap height
+     sits higher, so it gets nudged up onto it. */
+  transform: translateY(-0.11em);
 }
 
 .contact-card {
@@ -1017,10 +1185,21 @@ a { transition: color 0.3s ease-in-out; }
   overflow: hidden;
 }
 
+/* The mock splits the card 35/65, which Bootstrap's twelve columns cannot
+   express (35% is 4.2 of them) — col-lg-5/7 was landing on 41.7/58.3 and the
+   form panel came out visibly narrower than the mock's. The classes stay for
+   the stacking behaviour below lg; only the desktop widths are overridden. */
+@media (min-width: 992px) {
+  .contact-col--info { flex: 0 0 35%; max-width: 35%; }
+  .contact-col--form { flex: 0 0 65%; max-width: 65%; }
+}
+
 /* Left column */
 .contact-details {
   height: 100%;
-  padding: clamp(1rem, 2vw, 1.6rem);
+  /* The mock insets this copy about 4.4% of the card's width; it was running
+     at half that. */
+  padding: clamp(1.4rem, 2.4vw, 2.1rem) clamp(1.25rem, 2.1vw, 1.85rem);
   background-color: #f6f1eb;
   border-radius: 12px 0 0 12px;
   color: #1c1c1e;
@@ -1072,7 +1251,7 @@ a { transition: color 0.3s ease-in-out; }
 }
 
 .contact-item-note {
-  font-size: clamp(0.65rem, 0.78vw, 0.75rem);
+  font-size: clamp(0.75rem, 0.86vw, 0.9rem);
   font-weight: 500;
   line-height: 1.45;
   color: #6b6b70;
@@ -1081,7 +1260,13 @@ a { transition: color 0.3s ease-in-out; }
 
 .contact-item-value {
   display: block;
-  font-size: clamp(0.7rem, 0.85vw, 0.8rem);
+  /* Floored at 0.78rem — this bottomed out at 11.2px, and the phone / email
+     links are the two things a visitor on a phone most needs to hit. The
+     padding takes the tap target from 16px to ~24px tall without moving the
+     rows apart, since it eats the gap the note already left below it. */
+  font-size: clamp(0.78rem, 0.85vw, 0.8rem);
+  padding-block: 0.2rem;
+  margin-top: -0.2rem;
   font-weight: 700;
   font-style: normal;
   line-height: 1.45;
@@ -1096,7 +1281,16 @@ a.contact-item-value:hover { color: var(--accent); }
   /* auto on both sides splits the leftover column height evenly, so the box
      lands in the middle of the gap rather than being pushed to the bottom */
   margin-block: auto;
+  /* The 35/65 split narrows this column, and at the default gaps the title
+     broke onto a third line. Tightening the box's own gutters and badge hands
+     the copy back the ~20px it needs to sit on two lines, as the mock has it. */
+  gap: 0.55rem;
+  padding: 0.8rem 0.85rem;
 }
+
+.contact-details .google-reviews { width: clamp(42px, 4vw, 52px); }
+.contact-details .google-mark { width: clamp(22px, 2vw, 28px); }
+.contact-details .google-title { font-size: clamp(0.75rem, 0.78vw, 0.76rem); }
 
 .contact-social {
   display: flex;
@@ -1149,12 +1343,18 @@ a.contact-item-value:hover { color: var(--accent); }
   background: linear-gradient(160deg, rgba(120, 8, 60, 0.72), rgba(20, 0, 12, 0.82));
 }
 
-.contact-form-inner { padding: clamp(1rem, 2vw, 1.6rem); }
+/* 8% of the panel's own width on each side, the same figure the landing uses —
+   that magenta margin around the heading and the white card is most of what
+   made the mock's form panel read as roomier than this one. */
+.contact-form-inner {
+  padding: clamp(1.5rem, 2.6vw, 2.3rem) 8% clamp(1.7rem, 2.9vw, 2.5rem);
+}
 
 .contact-eyebrow {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(0.6rem, 0.75vw, 0.7rem);
+  /* The landing's equivalent floors at 0.8rem; this bottomed out at 9.6px. */
+  font-size: clamp(0.8rem, 0.95vw, 0.9rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--lime);
@@ -1171,11 +1371,13 @@ a.contact-item-value:hover { color: var(--accent); }
   margin-bottom: 0.4rem;
 }
 
+/* The landing's equivalent (.contact-form__desc) sits a good step above body
+   copy at 21.6px/500, not 16px/600. */
 .contact-form-lead {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: clamp(1.1rem, 1.45vw, 1.35rem);
+  line-height: 1.5;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
-  max-width: 30rem;
   margin-bottom: 1rem;
 }
 
@@ -1285,174 +1487,297 @@ a.contact-item-value:hover { color: var(--accent); }
 
 /* --------------------------------------------------------------------------
    SECTION 10 — FAQ
+   Ported from the bay-eight landing: flat near-black over a dimmed room photo,
+   a sticky intro column, and cream question cards that tilt in 3D under the
+   cursor. Runs on the landing's palette, like the header and footer.
    -------------------------------------------------------------------------- */
 .faq {
   position: relative;
-  background-color: var(--bg);
-  isolation: isolate;
+  /* No magenta wash — the landing keeps the photo far back under a flat
+     near-black scrim and lets the cream cards carry all the contrast. */
+  background-color: #0a0a0a;
+  background-image:
+    linear-gradient(rgba(10, 10, 10, 0.78), rgba(10, 10, 10, 0.86)),
+    url("../assets/img/culture/booth-bg.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-clip: padding-box;
+  color: var(--l-cream);
   /* clip, not hidden — hidden would make this the scroll container for
      .faq-aside and kill its position: sticky */
   overflow: clip;
-  /* One full screen. The backdrop is absolutely positioned, so the only item
-     in flow is the content — centring it turns the spare height into even
-     padding at any window size. */
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   padding-block: var(--section-pad);
 }
 
-.faq-media {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
+.faq-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: start;
 }
 
-.faq-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* The source is cropped so he sits about 23% across and 21% down; anchoring
-     the top keeps him there instead of letting a wide box crop to his chest. */
-  object-position: center top;
-  /* Only partly desaturated — the mock still reads the room, it is just dark */
-  filter: grayscale(0.35) contrast(1.05) brightness(0.9);
-}
-
-/* Brand pink, not black. The photo stays visible right across the section —
-   including behind the question cards — it just deepens towards the right. */
-.faq-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    /* A restrained plum wash, not a magenta flood — the mock keeps the photo
-       readable and lets the cards carry the colour. Both stops come from their
-       own ramp: --secondary-purple and --secondary-purple-dark over
-       --primary-black. */
-    radial-gradient(72% 100% at 20% 48%, rgba(86, 31, 168, 0.26), transparent 72%),
-    linear-gradient(
-      100deg,
-      rgba(24, 0, 61, 0.70) 0%,
-      rgba(13, 8, 6, 0.80) 50%,
-      rgba(13, 8, 6, 0.90) 100%
-    );
-}
-
-@media (max-width: 991.98px) {
-  .faq-overlay {
-    background:
-      radial-gradient(90% 60% at 25% 20%, rgba(86, 31, 168, 0.24), transparent 68%),
-      linear-gradient(to bottom, rgba(24, 0, 61, 0.68), rgba(13, 8, 6, 0.9) 55%);
-  }
-}
-
-/* Rides down with the accordion instead of sitting centred in the column */
-@media (min-width: 992px) {
-  .faq-aside {
-    position: sticky;
-    top: calc(var(--nav-h) + 2rem);
-  }
-}
-
-.faq-title { max-width: 14em; }
-.faq-intro { max-width: 24rem; }
-
-.faq-list {
+/* ---- Left — sticky intro ---------------------------------------------- */
+.faq-aside {
+  position: sticky;
+  top: clamp(5rem, 7vw, 6.5rem);
   display: flex;
   flex-direction: column;
-  gap: clamp(0.5rem, 1vw, 0.85rem);
+  gap: clamp(0.75rem, 1.2vw, 1rem);
+}
+
+.faq-title {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.1rem, 4.5vw, 3.6rem);
+  line-height: 0.95;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  color: var(--l-cream);
+}
+
+/* Pink dot in the left margin, pulsing gently — same mark the footer uses. */
+.faq-title-bullet {
+  position: absolute;
+  top: 0.4em;
+  right: 100%;
+  margin-right: 0.35em;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: var(--l-pink);
+  opacity: 0.6;
+  animation: faq-bullet-pulse 2.8s var(--ease-sine) infinite alternate;
+}
+
+@keyframes faq-bullet-pulse {
+  to { transform: scale(1.22); opacity: 0.85; }
+}
+
+.faq-eyebrow {
+  margin: clamp(0.5rem, 1vw, 0.85rem) 0 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.15rem, 1.7vw, 1.55rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--l-lime);
+}
+
+.faq-intro {
+  margin: clamp(0.5rem, 1vw, 0.85rem) 0 0;
+  max-width: 38ch;
+  font-weight: 400;
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  line-height: 1.5;
+  color: rgba(247, 244, 235, 0.75);
+}
+
+/* ---- Right — accordion ------------------------------------------------- */
+.faq-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1vw, 0.85rem);
 }
 
 .faq-item {
-  background-color: #f2efe9;
-  border-radius: 8px;
+  background-color: var(--l-cream);
+  color: #050505;
+  border-radius: clamp(8px, 0.9vw, 12px);
   overflow: hidden;
-  /* Lifts the cards off the photo now that it runs behind them */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  /* Entrance state — odd cards come in from the left, even from the right.
+     main.js flips .is-in as each one scrolls into view. */
+  opacity: 0;
+  transform: translateX(var(--faq-from, -80px)) rotate(var(--faq-tilt, -3deg)) scale(0.95);
+  transition: transform 0.7s var(--ease-p3out), opacity 0.7s var(--ease-p3out),
+              box-shadow 0.25s var(--l-ease);
 }
 
-.faq-item summary {
-  display: flex;
+.faq-item:nth-child(even) {
+  --faq-from: 80px;
+  --faq-tilt: 3deg;
+}
+
+.faq-item.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* While the cursor is over a card, main.js writes the 3D tilt straight onto
+   the element; the shorter curve here is the one that reads during the move,
+   and dropping the class on mouseleave hands the settle back to the 0.7s
+   curve above — exactly the two speeds the landing uses. */
+.faq-item.is-tilting {
+  transition: transform 0.35s var(--ease-p2out), box-shadow 0.25s var(--l-ease);
+}
+
+.faq-item:hover {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Pointer-less devices get the plain lift instead of the cursor tilt. */
+@media (hover: hover) and (pointer: coarse), (hover: none) {
+  .faq-item.is-in:hover { transform: translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-item {
+    opacity: 1;
+    transform: none;
+    transition: box-shadow 0.25s ease;
+  }
+}
+
+.faq-toggle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: clamp(0.85rem, 1.6vw, 1.25rem) clamp(1rem, 1.8vw, 1.5rem);
+  gap: clamp(1rem, 1.8vw, 1.5rem);
+  padding: clamp(1rem, 1.5vw, 1.35rem) clamp(1.25rem, 2vw, 1.75rem);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.faq-toggle:focus-visible {
+  outline: 2px solid var(--l-pink);
+  outline-offset: -2px;
+}
+
+.faq-question {
   font-family: var(--font-display);
-  /* Their rule says 600, but that lands on Integral CF Extra Bold — a
-     single-weight face, so the number is inert there. Montserrat does honour
-     it, and 600 read far too light, so this matches the rendered weight. */
   font-weight: 800;
-  font-size: 17px;
+  font-size: clamp(0.95rem, 1.25vw, 1.15rem);
   line-height: 1.25;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: #0d0806;
-  cursor: pointer;
-  list-style: none;
+  color: #050505;
 }
 
-/* Hide the native disclosure triangle in both engines */
-.faq-item summary::-webkit-details-marker { display: none; }
-.faq-item summary::marker { content: ''; }
-
-.faq-item summary:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: -3px;
-}
-
-/* The + is drawn from two bars so it can rotate into an × when open */
+/* The + is drawn from two bars; the whole icon rotates 135° so it lands as
+   an × in one unified motion rather than the bars moving separately. */
 .faq-icon {
   position: relative;
-  flex: 0 0 auto;
-  width: clamp(16px, 1.6vw, 22px);
-  height: clamp(16px, 1.6vw, 22px);
-  transition: transform 0.25s ease;
+  width: clamp(22px, 1.8vw, 28px);
+  height: clamp(22px, 1.8vw, 28px);
+  flex-shrink: 0;
+  transition: transform 0.35s var(--l-ease);
 }
 
 .faq-icon::before,
 .faq-icon::after {
   content: '';
   position: absolute;
-  left: 50%;
-  top: 50%;
-  background-color: var(--accent);
-  border-radius: 1px;
+  background-color: var(--l-pink);
+  border-radius: 2px;
+  transition: transform 0.35s var(--l-ease), opacity 0.25s var(--l-ease);
 }
 
 .faq-icon::before {
-  width: 100%;
-  height: 3px;
-  transform: translate(-50%, -50%);
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 5px;
+  margin-top: -2.5px;
 }
 
 .faq-icon::after {
-  width: 3px;
-  height: 100%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 5px;
+  margin-left: -2.5px;
 }
 
-.faq-item[open] .faq-icon { transform: rotate(45deg); }
+.faq-item.is-open .faq-icon { transform: rotate(135deg); }
 
-.faq-answer {
-  padding: 0 clamp(1rem, 1.8vw, 1.5rem) clamp(0.9rem, 1.6vw, 1.25rem);
+/* main.js drives height + opacity; this is the closed state. */
+.faq-panel {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
 }
 
-.faq-answer p {
+/* A closed panel must leave layout entirely, even if a stale inline height
+   is still sitting on it. */
+.faq-panel[hidden] { display: none !important; }
+
+.faq-panel-inner {
+  padding: clamp(0.85rem, 1.3vw, 1.15rem) clamp(1.25rem, 2vw, 1.75rem) clamp(1.1rem, 1.6vw, 1.45rem);
+  border-top: 1px solid rgba(5, 5, 5, 0.08);
+}
+
+.faq-panel-inner p {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
   line-height: 1.6;
-  color: #46464c;
+  color: rgba(5, 5, 5, 0.78);
 }
 
+/* Bootstrap paints bare links its own blue; inside the answers they take the
+   brand pink like every other link on the site. */
+.faq-panel-inner a {
+  color: var(--l-pink);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s var(--l-ease);
+}
+
+.faq-panel-inner a:hover,
+.faq-panel-inner a:focus-visible { color: var(--accent); }
+
+/* ---- Stack below lg — the intro moves above the list and centres --------- */
+@media (max-width: 991.98px) {
+  .faq-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .faq-aside {
+    position: static;
+    text-align: center;
+    align-items: center;
+  }
+
+  .faq-title {
+    display: inline-block;
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  /* The dot comes back inline so it stays beside the first word. */
+  .faq-title-bullet {
+    position: static;
+    display: inline-block;
+    margin: 0 0.35em 0 0;
+    vertical-align: 0.12em;
+  }
+
+  .faq-intro {
+    max-width: none;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .faq-toggle { gap: 0.9rem; }
+}
 
 /* --------------------------------------------------------------------------
    Buttons
    -------------------------------------------------------------------------- */
 .btn {
   /* Their .et_pb_button sits at 16px / 600, but that number is read against
-     IntegralCF Regular; Poppins needs 700 to carry the same weight. */
+     IntegralCF Regular; Inter needs 700 to carry the same weight. */
   --bs-btn-font-weight: 700;
   --bs-btn-font-size: 16px;
   /* They run fully rounded buttons (border-radius 32px-100px on .et_pb_button) */
@@ -1569,273 +1894,502 @@ a.contact-item-value:hover { color: var(--accent); }
 
 /* --------------------------------------------------------------------------
    Footer
+   Same anatomy as the bay-eight landing: a sign-off row on flat black, then a
+   #111111 panel carrying the bordered link grid, the info strip and the legal
+   bar. Runs on the landing's own palette — pink #E82276, lime #C8F03B, cream
+   text — which is why those live in their own tokens rather than the page's.
    -------------------------------------------------------------------------- */
-/* Near-black with only a whisper of warmth — the live footer reads almost flat.
-   The pink there is brighter than the page accent, so it's scoped here. */
-/* The live footer runs much wider than the page container — its panel sits
-   about 5.2vw in from each edge at 1680, against the container's 180px. */
-.site-footer > .container {
-  max-width: none;
-  padding-inline: clamp(1.25rem, 5.2vw, 5.5rem);
-}
-
 .site-footer {
-  --pink: var(--accent);
-  background-color: var(--bg);
-  background-image: radial-gradient(120% 85% at 50% 20%, rgba(105, 18, 50, 0.18), transparent 68%);
-  /* Rule across the top, marking the footer off from the section above it */
-  border-top: 1px solid var(--line-section);
-  /* Height comes from the content, not the viewport — the mock's footer is a
-     compact band, and tying it to 100svh stretched it on tall windows. */
-  padding-block: clamp(1.75rem, 3.5vw, 3rem);
+  position: relative;
+  background-color: var(--l-panel);
+  background-image: none;
+  color: var(--l-cream);
+  /* No bottom padding — the legal strip terminates the footer. */
+  padding: clamp(3rem, 6vw, 5rem) 0 0;
 }
 
-/* Sign-off band */
-.footer-signoff {
-  display: flex;
-  flex-wrap: wrap;
+/* The footer rows run much wider than the page container. */
+.site-footer > .container,
+.site-footer .container {
+  max-width: none;
+  width: min(100% - (clamp(1.25rem, 3.5vw, 2.5rem) * 2), 1560px);
+  margin-inline: auto;
+  padding-inline: 0;
+}
+
+/* Everything below the sign-off row sits on the panel. */
+.site-footer__panel {
+  position: relative;
+  padding-top: clamp(0.5rem, 1vw, 1rem);
+  background-color: var(--l-panel);
+}
+
+/* ---- Row 1 — sign-off + CTA ------------------------------------------- */
+.site-footer__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: clamp(1.25rem, 2.4vw, 2rem);
+  margin-bottom: clamp(2rem, 4vw, 3rem);
 }
 
-.footer-shout {
+.site-footer__brand-row {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 0.8vw, 0.65rem);
+  min-width: 0;
+}
+
+.site-footer__title {
+  position: relative;
   margin: 0;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 58px;
-  line-height: 1;
-  letter-spacing: 0.01em;
+  font-size: clamp(2.25rem, 5.2vw, 4.25rem);
+  line-height: 0.95;
+  letter-spacing: 0.005em;
   text-transform: uppercase;
-  color: var(--ink);
-  margin-bottom: 0.25rem;
+  color: var(--l-cream);
 }
 
-/* The lime pill CTA, shared by the footer's BOOK NOW and Success Stories'
-   APPLY NOW: it empties out to a lime outline on hover, the way
-   .et_pb_button_0_tb_footer:hover does on the live site. */
-.btn-cta {
-  --bs-btn-color: #0d0806;
-  --bs-btn-bg: var(--lime);
-  --bs-btn-border-color: var(--lime);
-  --bs-btn-hover-color: var(--lime);
-  --bs-btn-hover-bg: transparent;
-  --bs-btn-hover-border-color: var(--lime);
-  --bs-btn-border-width: 2px;
-  --bs-btn-padding-x: clamp(1.75rem, 3.5vw, 3rem);
-  --bs-btn-padding-y: 0.9rem;
-  --bs-btn-font-size: clamp(0.85rem, 1.25vw, 1.1rem);
-  --bs-btn-border-radius: 999px;
-}
-
-/* Link grid — outline only. The live panel has no fill; it's the border alone
-   that separates it from the background. */
-.footer-panel {
-  padding: clamp(1.25rem, 2.2vw, 2rem);
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: clamp(16px, 1.8vw, 26px);
-}
-
-.footer-title {
+.site-footer__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.15rem, 0.3vw, 0.28rem) clamp(1.9rem, 3.2vw, 2.8rem);
+  background: var(--l-lime);
+  color: #050505;
+  border: 1px solid var(--l-lime);
+  border-radius: 10px;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 18px;
-  letter-spacing: 0.05em;
+  font-size: clamp(1.3rem, 2vw, 1.75rem);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--ink);
-  margin-bottom: 1.25rem;
+  white-space: nowrap;
+  transition: background-color 0.2s var(--l-ease), color 0.2s var(--l-ease),
+              border-color 0.2s var(--l-ease), transform 0.2s var(--l-ease);
 }
 
-/* The first word of each heading picks up the brand pink */
-.footer-title span { color: var(--pink); }
+.site-footer__cta:hover {
+  background: #0a0a0a;
+  color: var(--l-lime);
+  transform: translateY(-2px);
+}
 
-.footer-list {
+.site-footer__cta:active { transform: translateY(0); }
+
+/* ---- Row 2 — cream-bordered link grid --------------------------------- */
+.site-footer__middle { margin-bottom: clamp(2rem, 4vw, 3rem); }
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.05fr)
+    minmax(0, 1.15fr)
+    minmax(0, 1fr)
+    minmax(0, 1.2fr)
+    minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+  padding: clamp(1.5rem, 2.5vw, 2.25rem) clamp(1.75rem, 3vw, 2.5rem);
+  /* Black fill so the bordered grid reads as its own block on the panel. */
+  background-color: #000000;
+  border: 1px solid var(--l-cream);
+  border-radius: clamp(22px, 2.2vw, 32px);
+}
+
+.site-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1.2vw, 1rem);
+  min-width: 0;
+}
+
+.site-footer__col-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3em;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(0.9rem, 1.15vw, 1.1rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--l-pink);
+}
+
+.site-footer__col-title-sub {
+  color: var(--l-cream);
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+.site-footer__links {
   list-style: none;
-  padding: 0;
   margin: 0;
-}
-
-.footer-list li + li { margin-top: 0.75rem; }
-
-.footer-list a {
-  font-size: clamp(0.78rem, 0.95vw, 0.92rem);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink);
-  transition: color 0.2s ease, padding-left 0.2s ease;
-}
-
-.footer-list a:hover {
-  color: var(--pink);
-  padding-left: 0.25rem;
-}
-
-.footer-contact { margin: 0; }
-
-.footer-contact-head {
+  padding: 0;
   display: flex;
+  flex-direction: column;
+  gap: clamp(0.45rem, 0.75vw, 0.6rem);
+}
+
+/* Integral CF Regular — the one place the display face is used at 400. */
+.site-footer__links a {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 0.95vw, 0.9rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--l-cream);
+  transition: color 0.2s var(--l-ease);
+}
+
+.site-footer__links a:hover { color: var(--l-pink); }
+
+/* ---- Connect column --------------------------------------------------- */
+.site-footer__col--connect { gap: clamp(0.85rem, 1.3vw, 1.1rem); }
+
+.site-footer__connect-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "icon label"
+    ".    value";
+  column-gap: 0.65rem;
+  row-gap: 0.15rem;
   align-items: center;
-  gap: 0.55rem;
+  color: var(--l-cream);
+  transition: opacity 0.2s var(--l-ease);
+}
+
+.site-footer__connect-row:hover { opacity: 0.85; }
+
+.site-footer__connect-icon {
+  grid-area: icon;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 1rem;
+  color: var(--l-pink);
+  flex-shrink: 0;
+}
+
+/* display:contents so the label and value land in the parent grid's areas. */
+.site-footer__connect-body { display: contents; }
+
+.site-footer__connect-label {
+  grid-area: label;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(0.8rem, 1.05vw, 1rem);
-  letter-spacing: 0.05em;
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink);
-  margin-bottom: 0.4rem;
+  color: var(--l-cream);
 }
 
-.footer-contact-head .bi { color: var(--pink); }
-
-a.footer-contact-head:hover { color: var(--pink); }
-
-.footer-contact a:not(.footer-contact-head) {
-  font-size: clamp(0.85rem, 1.05vw, 1rem);
-  font-weight: 600;
-  color: var(--pink);
-  padding-left: 1.55rem;
+.site-footer__connect-value {
+  grid-area: value;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(0.95rem, 1.15vw, 1.1rem);
+  letter-spacing: 0.01em;
+  color: var(--l-pink);
 }
 
-.footer-contact a:not(.footer-contact-head):hover { color: var(--accent-bright); }
+.site-footer__connect-divider {
+  height: 1px;
+  background: rgba(247, 244, 235, 0.18);
+  margin: 0.25rem 0;
+}
 
-/* Short rule, as on the live site — an <hr> with no width spans the whole
-   column, which got long once the footer widened. */
-.footer-rule {
-  width: 14rem;
+/* ---- Badge column ----------------------------------------------------- */
+.site-footer__col--badge {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.site-footer__badge {
+  width: clamp(200px, 22vw, 340px);
+  /* Bootstrap's reboot doesn't cap image width, and the badge's clamp runs
+     wider than its column below ~1720px — without this it breaks the grid's
+     border. */
   max-width: 100%;
-  margin-block: 1.1rem;
-  margin-inline: 0;
-  border-color: rgba(255, 255, 255, 0.15);
-  opacity: 1;
+  height: auto;
+  object-fit: contain;
 }
 
-.footer-years {
-  width: clamp(150px, 16vw, 245px);
+/* ---- Row 3 — info strip ------------------------------------------------ */
+/* Four blocks spread across the row. Every column is `auto` and the free
+   space goes into the gaps via space-between — with a 1fr column the partners
+   block swallowed all of it and the first three bunched up on the left. */
+.site-footer__bottom {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  /* Top-aligned so "Get Directions" and "Our Partners" share a baseline; the
+     wordmark and the Google card re-centre themselves against the tallest
+     block below. */
+  align-items: start;
+}
+
+.site-footer__brand-stack,
+.site-footer__reviews { align-self: center; }
+
+.site-footer__brand-stack {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--l-pink);
+}
+
+.site-footer__small-heading {
+  margin: 0 0 clamp(0.4rem, 0.7vw, 0.55rem);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(0.85rem, 1.05vw, 1rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--l-cream);
+}
+
+.site-footer__directions address {
+  margin: 0;
+  font-style: normal;
+  font-weight: 500;
+  font-size: clamp(0.85rem, 0.95vw, 0.92rem);
+  line-height: 1.45;
+  color: rgba(247, 244, 235, 0.75);
+}
+
+.site-footer__open {
+  margin: clamp(0.45rem, 0.8vw, 0.65rem) 0 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.85rem, 1vw, 0.95rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--l-cream);
+}
+
+.site-footer__partner-mark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: var(--l-cream);
+}
+
+.site-footer__partner-mark span {
+  color: var(--l-pink);
+  margin: 0 -0.05em;
+}
+
+/* The Google card is the shared .google-box; only its footer placement and
+   width change here. */
+.site-footer__reviews {
+  justify-self: end;
   height: auto;
 }
 
-/* Address / partners / rating */
-.footer-info {
-  padding-block: clamp(1.25rem, 2.2vw, 1.9rem);
-}
+/* The card sizes to max-content in the grid, which on one line makes it run
+   half the strip wide. Cap the copy so the title breaks over two lines, the
+   way it does on the landing. */
+.site-footer__reviews .google-title { max-width: 19ch; }
 
-.footer-brand {
-  color: var(--pink);
-  font-size: 1.35rem;
-}
-
-.footer-subtitle {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 18px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink);
-  margin-bottom: 0.5rem;
-}
-
-.footer-address {
-  font-size: clamp(0.65rem, 0.78vw, 0.75rem);
-  font-weight: 600;
-  font-style: normal;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-  margin-bottom: 0.75rem;
-}
-
-.footer-hours {
-  font-size: clamp(0.65rem, 0.78vw, 0.75rem);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-  margin: 0;
-}
-
-.footer-partner {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 1.4rem;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  margin: 0;
-}
-
-/* Legal bar */
-.footer-legal {
-  display: flex;
-  flex-wrap: wrap;
+/* ---- Legal bar --------------------------------------------------------- */
+.site-footer__legal {
+  margin-top: clamp(1.5rem, 2.5vw, 2.25rem);
+  padding-top: clamp(1rem, 1.5vw, 1.5rem);
+  /* Deep enough to clear the two fixed corner buttons, which land on this row
+     once the page is scrolled to the very bottom — the back-to-top pill would
+     otherwise sit on top of the social icons and the chat bubble on the
+     copyright. Tracks the taller of the two (the chat bubble) plus its offset. */
+  padding-bottom: clamp(5rem, 5.5vw, 6rem);
+  border-top: 1px solid rgba(247, 244, 235, 0.12);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: clamp(1rem, 2vw, 1.75rem);
 }
 
-.footer-copy,
-.footer-privacy {
-  font-size: clamp(0.62rem, 0.75vw, 0.72rem);
-  font-weight: 500;
-  color: var(--muted-2);
+.site-footer__copyright {
   margin: 0;
+  font-weight: 400;
+  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  color: rgba(247, 244, 235, 0.6);
+  justify-self: start;
 }
 
-.footer-privacy:hover { color: var(--pink); }
+.site-footer__privacy {
+  font-weight: 400;
+  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+  letter-spacing: 0.02em;
+  color: rgba(247, 244, 235, 0.6);
+  justify-self: center;
+  transition: color 0.2s var(--l-ease);
+}
 
-.footer-social {
+.site-footer__privacy:hover { color: var(--l-pink); }
+
+.site-footer__social {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  gap: 0.9rem;
-  font-size: 0.9rem;
+  gap: clamp(0.85rem, 1.4vw, 1.15rem);
+  justify-self: end;
 }
 
-.footer-social a {
-  color: var(--muted-2);
-  transition: color 0.2s ease;
+.site-footer__social a {
+  display: inline-flex;
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  color: rgba(247, 244, 235, 0.65);
+  transition: color 0.2s var(--l-ease), transform 0.2s var(--l-ease);
 }
 
-.footer-social a:hover { color: var(--pink); }
+.site-footer__social a:hover {
+  color: var(--l-pink);
+  transform: translateY(-1px);
+}
 
-/* Floating actions */
+/* ---- Responsive collapse ----------------------------------------------- */
+@media (max-width: 1200px) {
+  .site-footer__bottom {
+    grid-template-columns: repeat(3, auto);
+  }
+  .site-footer__reviews { grid-column: 1 / -1; justify-self: start; }
+}
+
+@media (max-width: 980px) {
+  .site-footer__top {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+  .site-footer__cta { justify-self: start; }
+  .site-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+  }
+  .site-footer__col--badge {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+  .site-footer__bottom {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-footer__grid { grid-template-columns: 1fr; }
+  .site-footer__title { font-size: clamp(1.85rem, 8vw, 2.6rem); }
+
+  /* Everything centres and stacks, as it does on the landing. */
+  .site-footer__top { justify-items: center; text-align: center; }
+  .site-footer__brand-row { align-items: center; }
+  .site-footer__cta { justify-self: center; }
+
+  .site-footer__col { align-items: center; text-align: center; }
+  .site-footer__col-title { justify-content: center; }
+  .site-footer__col--badge { justify-content: center; }
+
+  /* Icon + label on one line, the number centred underneath. */
+  .site-footer__connect-row {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "icon  label"
+      "value value";
+    justify-content: center;
+    column-gap: 0.4rem;
+    row-gap: 0.25rem;
+    text-align: center;
+  }
+  .site-footer__connect-divider { width: 60%; margin-inline: auto; }
+
+  .site-footer__bottom {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+    justify-items: center;
+    text-align: center;
+  }
+  .site-footer__directions address { text-align: center; }
+  .site-footer__reviews { justify-self: center; }
+
+  .site-footer__legal {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 1rem;
+  }
+  .site-footer__copyright,
+  .site-footer__privacy,
+  .site-footer__social { justify-self: center; }
+}
+
+/* Floating actions
+   Two different shapes now, so they no longer share a block: the chat bubble
+   is the mock's flat pink circle, the back-to-top is the landing's outlined
+   oval pill. */
 .chat-bubble,
 .to-top {
   position: fixed;
   z-index: 1040;
-  width: 3rem;
-  height: 3rem;
   display: grid;
   place-items: center;
+  cursor: pointer;
+}
+
+/* Pink circle with a white speech bubble, as drawn in the mock — flat, with a
+   plain drop shadow rather than the brand-pink glow and pulse it used to
+   carry. */
+.chat-bubble {
+  left: clamp(1rem, 2vw, 1.75rem);
+  bottom: clamp(1rem, 2vw, 1.75rem);
+  width: clamp(3rem, 3.6vw, 3.5rem);
+  height: clamp(3rem, 3.6vw, 3.5rem);
   border: 0;
   border-radius: 50%;
-  font-size: 1.15rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.chat-bubble {
-  left: 1.25rem;
-  bottom: 1.25rem;
   background-color: var(--accent);
   color: #fff;
-  box-shadow: 0 10px 30px rgba(255, 16, 151, 0.35);
+  font-size: clamp(1.25rem, 1.55vw, 1.5rem);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s var(--l-ease), background-color 0.2s var(--l-ease);
 }
 
+.chat-bubble:hover { transform: translateY(-3px); }
+
+/* Outlined oval, transparent fill, cream chevron — the landing's back-to-top.
+   Wider than it is tall so it reads as a pill, not a circle. */
 .to-top {
-  right: 1.25rem;
-  bottom: 1.25rem;
-  background-color: #f2f2f4;
-  color: #0d0806;
-  border: 0;
+  right: clamp(1rem, 2vw, 1.75rem);
+  bottom: clamp(1rem, 2vw, 1.75rem);
+  width: clamp(56px, 5vw, 70px);
+  height: clamp(32px, 3vw, 40px);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--l-cream);
+  border: 1.5px solid rgba(247, 244, 235, 0.9);
+  font-size: clamp(0.85rem, 1vw, 1rem);
+  transition: transform 0.3s var(--l-ease), background 0.2s var(--l-ease),
+              color 0.2s var(--l-ease);
 }
 
-.chat-bubble:hover,
-.to-top:hover { transform: translateY(-3px); }
-
-.to-top:hover { background-color: var(--lime); color: #0d0806; }
+.to-top:hover {
+  background: rgba(247, 244, 235, 0.12);
+  transform: translateY(-2px);
+}
 
 .chat-bubble:focus-visible,
 .to-top:focus-visible {
@@ -1870,37 +2424,21 @@ a.footer-contact-head:hover { color: var(--pink); }
 }
 
 /* Lifted from their .et_pb_row_22:hover — a flat halo in the brand pink, plus
-   the small scale their .colhvr:hover .txthvr uses, on the same easing. */
-.story:hover,
-.faq-item:hover,
+   the small scale their .colhvr:hover .txthvr uses, on the same easing.
+   The story cards used to be in here; they carry the landing's 3D tilt now. */
 .dna-card:hover {
   box-shadow: 0 0 40px var(--accent);
   transform: scale(1.015);
 }
 
-.story,
-.faq-item,
 .dna-card {
   transition: transform 0.4s var(--hover-ease), box-shadow 0.3s ease-in-out;
 }
 
-
-.faq-item:hover { background-color: #fff; }
-
-.faq-item summary:hover .faq-icon { transform: rotate(90deg); }
-.faq-item[open] summary:hover .faq-icon { transform: rotate(45deg); }
 
 .contact-icon:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-/* Chat bubble breathes so it reads as live without pulling focus */
-@keyframes chat-halo {
-  0%   { box-shadow: 0 10px 30px rgba(255, 16, 151, 0.35), 0 0 0 0 rgba(255, 16, 151, 0.45); }
-  70%  { box-shadow: 0 10px 30px rgba(255, 16, 151, 0.35), 0 0 0 14px rgba(255, 16, 151, 0); }
-  100% { box-shadow: 0 10px 30px rgba(255, 16, 151, 0.35), 0 0 0 0 rgba(255, 16, 151, 0); }
-}
 
-.chat-bubble { animation: chat-halo 3.2s ease-out infinite; }
-.chat-bubble:hover { animation-play-state: paused; }
