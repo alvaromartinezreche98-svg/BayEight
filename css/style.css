@@ -797,6 +797,21 @@ a { transition: color 0.3s ease-in-out; }
   margin: 0;
 }
 
+/* Between lg and the width where two content-hugging boxes still fit side by
+   side, the flex wrap breaks as 1 + 1 + 2 and the stagger stops meaning
+   anything. Swap to a plain two-up grid for that band: the ragged edge is a
+   desktop nicety, and an even 2x2 reads far better than a stray full-width
+   row. The break element is a flex device, so it steps out here. */
+@media (min-width: 768px) and (max-width: 1200px) {
+  .dna-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dna-row-gap) clamp(1rem, 1.5vw, 1.4rem);
+  }
+  .dna-break { display: none; }
+  .dna-break + .dna-card { margin-left: 0; }
+}
+
 /* Content-width cards would overflow a phone, so give each one the full row */
 @media (max-width: 767.98px) {
   .dna-card { flex: 1 1 100%; }
@@ -1170,8 +1185,13 @@ a { transition: color 0.3s ease-in-out; }
   background-color: var(--l-pink);
   opacity: 0.6;
   /* vertical-align:middle centres the dot on the x-height; the cap height
-     sits higher, so it gets nudged up onto it. */
-  transform: translateY(-0.11em);
+     sits higher, so it gets nudged up onto it. The nudge rides on `translate`
+     rather than `transform` because the pulse below animates `transform` —
+     keeping them on separate properties means the keyframe cannot wipe the
+     alignment out. `transform: none` clears the 0.06em the base rule set. */
+  transform: none;
+  translate: 0 -0.11em;
+  animation: bullet-pulse 1.4s var(--ease-sine) infinite alternate;
 }
 
 .contact-card {
@@ -1428,6 +1448,18 @@ a.contact-item-value:hover { color: var(--accent); }
 
 .contact-form textarea { resize: vertical; }
 
+/* Safari on iOS zooms the whole page the moment a field under 16px takes
+   focus, and it never zooms back out — the visitor is left scrolled sideways
+   inside a half-filled form. 14px is the size the card is drawn at, so the
+   floor is only raised where a coarse pointer says we are on touch. */
+@media (pointer: coarse) {
+  .contact-form input,
+  .contact-form select,
+  .contact-form textarea {
+    font-size: 16px;
+  }
+}
+
 .contact-form input::placeholder,
 .contact-form textarea::placeholder { color: #a0a0a8; }
 
@@ -1548,10 +1580,13 @@ a.contact-item-value:hover { color: var(--accent); }
   border-radius: 50%;
   background: var(--l-pink);
   opacity: 0.6;
-  animation: faq-bullet-pulse 2.8s var(--ease-sine) infinite alternate;
+  animation: bullet-pulse 1.4s var(--ease-sine) infinite alternate;
 }
 
-@keyframes faq-bullet-pulse {
+/* Shared by every brand bullet. 1.4s each way is the landing's figure — its
+   GSAP tween is duration 1.4 with yoyo, which is 1.4s out and 1.4s back, not
+   2.8s each way. This ran at half that speed until now. */
+@keyframes bullet-pulse {
   to { transform: scale(1.22); opacity: 0.85; }
 }
 
@@ -2266,11 +2301,15 @@ a.contact-item-value:hover { color: var(--accent); }
 }
 
 /* ---- Responsive collapse ----------------------------------------------- */
+/* Tablet: four blocks across is too tight, but three across leaves the Google
+   card stranded alone on a second row with half the width empty next to it.
+   Two by two is balanced. */
 @media (max-width: 1200px) {
   .site-footer__bottom {
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(2, auto);
+    row-gap: clamp(2rem, 4vw, 3rem);
   }
-  .site-footer__reviews { grid-column: 1 / -1; justify-self: start; }
+  .site-footer__reviews { justify-self: end; }
 }
 
 @media (max-width: 980px) {

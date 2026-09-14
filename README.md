@@ -22,8 +22,9 @@ framework, no bundler — open the file and it runs.
   painted with `currentColor`, so anything that sizes it through `font-size`
   behaves exactly as the old `<i class="bi bi-NAME">` did. To add a glyph, copy
   the path out of the bootstrap-icons package into a new `<symbol>`.
-- Google Fonts: **Inter** (body, 400–700) + **Big Shoulders Display / Anton**
-  (heading fallbacks) — the same stack the bay-eight landing runs.
+- Google Fonts: **Inter** only (body, 400–700). Anton and Big Shoulders used to
+  ride along as stand-ins for Integral CF; with all four of its cuts bundled
+  neither ever rendered, so they are no longer requested.
 - **Integral CF** for headings, in all four cuts (Regular 400, Bold 700,
   ExtraBold 800, Heavy 900), served from `assets/fonts/integral-cf/`. These are
   the files the bay-eight landing ships; having real weights is what lets the
@@ -84,9 +85,9 @@ python3 -m http.server 8080
   One known divergence: the landing declares `"Helvetica Now Display"` ahead of
   its Helvetica/Arial fallbacks on body copy, and never loads that face, so it
   silently renders Arial. This site keeps Inter (the landing's own
-  `--font-sans`) rather than copying a stack that resolves to a fallback; section kickers (`.eyebrow`) are 22px → 20px → 18px
-  with 1px letter-spacing; every section `h2` shares `--h2-size`
-  (45px → 36px → 28px). Two of bayeight.com's own weight values are inert on
+  `--font-sans`) rather than copying a stack that resolves to a fallback.
+  Section kickers (`.eyebrow`) are 22px → 20px → 18px with 1px letter-spacing,
+  and every section `h2` shares `--h2-size` (45px → 36px → 28px). Two of bayeight.com's own weight values are inert on
   their side — read literally they make headings here look thin, so the hero
   subtitle and the accordion title spell out the weight their font really
   renders at.
@@ -111,10 +112,6 @@ python3 -m http.server 8080
   things make that safe: the section is `overflow: clip`, and the bleeding block
   sets **no `width`** (a block box at `width: 100%` is over-constrained, so the
   negative margin would be dropped instead of widening it).
-- **The page must have no horizontal scroll at any width.** Check with
-  `document.documentElement.scrollWidth === clientWidth` at 390 / 768 / 992 /
-  1200 / 1366 / 1440 / 1680 / 1920 — the awkward ones are the exact Bootstrap
-  breakpoints, where a container is at its narrowest for the widest gutter.
 - **Bootstrap utilities for layout**, custom CSS only for what Bootstrap can't
   express. Override Bootstrap through its CSS variables (`--bs-*`).
 - **Timing comes from their site too**: `--sr-duration` 700ms, `--sr-stagger`
@@ -141,11 +138,22 @@ python3 -m http.server 8080
   arrives; when they disagree with the file the page shifts as each one loads.
   Eleven of them were wrong (`who-1.jpg` declared 480×640 against a real
   139×386, and so on) — check a new file's true size before writing the tag.
+- **Form controls must not drop below 16px on touch.** Safari on iOS zooms the
+  whole page the moment a field under 16px takes focus and never zooms back
+  out. The card is drawn at 14px, so the floor is raised inside
+  `@media (pointer: coarse)` rather than globally.
+- **Check the 992–1200 band specifically.** It is the one place desktop
+  layouts run at their tightest, and two of them broke there: the DNA boxes
+  wrapped 1 + 1 + 2 instead of 2 + 2, and the footer's bottom row left the
+  Google card stranded alone on a second row. Both now switch to a two-up grid
+  below 1200.
 - **No horizontal scroll at any width, and nothing under ~11.5px.** Both are
   swept at 320 / 360 / 390 / 414 / 480 / 576 / 640 / 768 / 820 / 992 / 1024 /
-  1200 / 1280 / 1366 / 1440 / 1536 / 1680 / 1920. The awkward widths are 320
-  (where a flat font-size on a content-hugging box overflows) and the exact
-  Bootstrap breakpoints (where a container is narrowest for the widest gutter).
+  1200 / 1280 / 1366 / 1440 / 1536 / 1680 / 1920, and on emulated iPhone SE /
+  12 / 14 Pro Max, Pixel 7, Galaxy S9+, iPad Mini / gen 7 / Pro 11 in both
+  orientations. The awkward widths are 320 (where a flat font-size on a
+  content-hugging box overflows) and the exact Bootstrap breakpoints (where a
+  container is narrowest for the widest gutter).
 
 ## Section notes
 
